@@ -7,9 +7,13 @@ public class CPU {
     private final Runnable[] opcodes;
 
     public CPU(MMU mmu) {
+        this(mmu, new Registers());
+    }
+
+    public CPU(MMU mmu, Registers reg) {
         this.mmu = mmu;
 
-        registers = new Registers();
+        registers = reg;
         opcodes = new Runnable[256];
 
         cycles = 0;
