@@ -5,3 +5,11 @@
 build
 
 bin
+
+.DS_STORE
+
+app/src/test/resources/*
+
+*.gb
+*.gbc
+*.rom
