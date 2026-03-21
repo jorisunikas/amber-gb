@@ -1,9 +1,9 @@
 package com.gbemu.core;
 
 public class Registers {
-    public int a, b, c, d, e, h, l;
-    public int sp, pc; // stack pointer, program counter
-    public boolean flagZ, // zero flag
+    private int a, b, c, d, e, h, l;
+    private int sp, pc; // stack pointer, program counter
+    private boolean flagZ, // zero flag
             flagN, // subtraction flag
             flagH, // half carry flag
             flagC; // carry flag
@@ -22,6 +22,94 @@ public class Registers {
         this.flagN = false;
         this.flagH = false;
         this.flagC = false;
+    }
+
+    public int getA() {
+        return a;
+    }
+
+    public void setA(int value) {
+        a = value & 0xFF;
+    }
+
+    public int getB() {
+        return b;
+    }
+
+    public void setB(int value) {
+        b = value & 0xFF;
+    }
+
+    public int getC() {
+        return c;
+    }
+
+    public void setC(int value) {
+        c = value & 0xFF;
+    }
+
+    public int getD() {
+        return d;
+    }
+
+    public void setD(int value) {
+        d = value & 0xFF;
+    }
+
+    public int getE() {
+        return e;
+    }
+
+    public void setE(int value) {
+        e = value & 0xFF;
+    }
+
+    public int getH() {
+        return h;
+    }
+
+    public void setH(int value) {
+        h = value & 0xFF;
+    }
+
+    public int getL() {
+        return l;
+    }
+
+    public void setL(int value) {
+        l = value & 0xFF;
+    }
+
+    public boolean isFlagZ() {
+        return flagZ;
+    }
+
+    public void setFlagZ(boolean value) {
+        flagZ = value;
+    }
+
+    public boolean isFlagN() {
+        return flagN;
+    }
+
+    public void setFlagN(boolean value) {
+        flagN = value;
+    }
+
+    public boolean isFlagH() {
+        return flagH;
+    }
+
+    public void setFlagH(boolean value) {
+        flagH = value;
+    }
+
+    public boolean isFlagC() {
+        return flagC;
+    }
+
+    public void setFlagC(boolean value) {
+        flagC = value;
     }
 
     public int getF() {
@@ -88,7 +176,19 @@ public class Registers {
         pc = value;
     }
 
-    public void incPC(){
+    public void incPC() {
         ++pc;
+    }
+
+    public void decPC() {
+        --pc;
+    }
+
+    public void incSP() {
+        ++sp;
+    }
+
+    public void decSP() {
+        --sp;
     }
 }

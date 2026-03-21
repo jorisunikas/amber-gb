@@ -31,7 +31,7 @@ public class CPU {
     }
 
     private int fetch() {
-        int opcode = mmu.readByte(registers.pc);
+        int opcode = mmu.readByte(registers.getPC());
         registers.incPC();
         return opcode;
     }
@@ -60,7 +60,7 @@ public class CPU {
     }
 
     private void jr_nz_s8() {
-        if (!registers.flagZ) {
+        if (!registers.isFlagZ()) {
             jr_s8();
             return;
         }
@@ -69,7 +69,7 @@ public class CPU {
     }
 
     private void jr_z_s8() {
-        if (registers.flagZ) {
+        if (registers.isFlagZ()) {
             jr_s8();
             return;
         }
