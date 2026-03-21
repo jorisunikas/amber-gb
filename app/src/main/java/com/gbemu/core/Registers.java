@@ -165,7 +165,7 @@ public class Registers {
     }
 
     public void setSP(int value) {
-        sp = value;
+        sp = value & 0xFFFF;
     }
 
     public int getPC() {
@@ -173,7 +173,7 @@ public class Registers {
     }
 
     public void setPC(int value) {
-        pc = value;
+        pc = value & 0xFFFF;
     }
 
     public void incPC() {

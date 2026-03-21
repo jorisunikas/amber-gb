@@ -24,7 +24,8 @@ public class CPU {
         int opcode = fetch();
         Runnable handler = opcodes[opcode];
         if (handler == null)
-            throw new IllegalStateException("Unrecognised opcode: 0x" + Integer.toHexString(opcode));
+            throw new IllegalStateException(
+                    "Unrecognised opcode: 0x" + Integer.toHexString(opcode));
 
         handler.run();
         return cycles;
@@ -41,6 +42,12 @@ public class CPU {
         opcodes[0x18] = this::jr_s8;
         opcodes[0x20] = this::jr_nz_s8;
         opcodes[0x28] = this::jr_z_s8;
+        opcodes[0x30] = this::jr_nc_s8;
+        opcodes[0x38] = this::jr_c_s8;
+        opcodes[0xC2] = this::jp_nz_u16;
+        opcodes[0xCA] = this::jp_z_u16;
+        opcodes[0xD2] = this::jp_nc_u16;
+        opcodes[0xDA] = this::jp_c_u16;
         opcodes[0xC3] = this::jp_u16;
     }
 
@@ -59,21 +66,55 @@ public class CPU {
         cycles = 12;
     }
 
-    private void jr_nz_s8() {
-        if (!registers.isFlagZ()) {
+    private void jump_flag_s8_helper(boolean flag) {
+        if (flag) {
             jr_s8();
             return;
         }
         fetch();
         cycles = 8;
+
+    }
+
+    private void jump_flag_u16_helper(boolean flag) {
+        if (flag) {
+            jp_u16();
+            return;
+        }
+        fetch();
+        fetch();
+        cycles = 12;
+    }
+
+    private void jr_nz_s8() {
+        jump_flag_s8_helper(!registers.isFlagZ());
     }
 
     private void jr_z_s8() {
-        if (registers.isFlagZ()) {
-            jr_s8();
-            return;
-        }
-        fetch();
-        cycles = 8;
+        jump_flag_s8_helper(registers.isFlagZ());
+    }
+
+    private void jr_nc_s8() {
+        jump_flag_s8_helper(!registers.isFlagC());
+    }
+
+    private void jr_c_s8() {
+        jump_flag_s8_helper(registers.isFlagC());
+    }
+
+    private void jp_nz_u16() {
+        jump_flag_u16_helper(!registers.isFlagZ());
+    }
+
+    private void jp_z_u16() {
+        jump_flag_u16_helper(registers.isFlagZ());
+    }
+
+    private void jp_nc_u16() {
+        jump_flag_u16_helper(!registers.isFlagC());
+    }
+
+    private void jp_c_u16() {
+        jump_flag_u16_helper(registers.isFlagC());
     }
 }
