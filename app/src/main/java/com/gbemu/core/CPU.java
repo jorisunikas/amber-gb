@@ -6,6 +6,7 @@ public class CPU {
     private int cycles;
     private final Runnable[] opcodes;
     private boolean halted;
+    private boolean ime;
 
     public CPU(MMU mmu) {
         this(mmu, new Registers());
@@ -61,14 +62,28 @@ public class CPU {
         opcodes[0xD8] = this::ret_c;
         opcodes[0xDA] = this::jp_c_u16;
         opcodes[0xC3] = this::jp_u16;
+        opcodes[0xF3] = this::di;
+        opcodes[0xFB] = this::ei;
     }
 
     // u(nsigned) vs s(igned)
 
-    //TODO implement fully
+    // TODO implement fully
     private void halt() {
         cycles = 4;
         halted = true;
+    }
+
+    // TODO implement fully
+    private void di() {
+        ime = false;
+        cycles = 4;
+    }
+
+    // TODO implement fully
+    private void ei() {
+        ime = true;
+        cycles = 4;
     }
 
     private void call_u16() {
