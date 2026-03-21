@@ -28,7 +28,7 @@ public class Registers {
         return ((flagZ ? 0x80 : 0) | (flagN ? 0x40 : 0) | (flagH ? 0x20 : 0) | (flagC ? 0x10 : 0));
     }
 
-    public void setF(int value){
+    public void setF(int value) {
         flagZ = (0x80 & value) != 0;
         flagN = (0x40 & value) != 0;
         flagH = (0x20 & value) != 0;
@@ -45,30 +45,50 @@ public class Registers {
         setF(value & 0xFF);
     }
 
-    public int getBC(){
+    public int getBC() {
         return (b << 8) | c;
     }
-    
-    public void setBC(int value){
+
+    public void setBC(int value) {
         b = (value >> 8) & 0xFF;
         c = value & 0xFF;
     }
 
-    public int getDE(){
+    public int getDE() {
         return (d << 8) | e;
     }
-    
-    public void setDE(int value){
+
+    public void setDE(int value) {
         d = (value >> 8) & 0xFF;
         e = value & 0xFF;
     }
 
-    public int getHL(){
+    public int getHL() {
         return (h << 8) | l;
     }
-    
-    public void setHL(int value){
+
+    public void setHL(int value) {
         h = (value >> 8) & 0xFF;
         l = value & 0xFF;
+    }
+
+    public int getSP() {
+        return sp;
+    }
+
+    public void setSP(int value) {
+        sp = value;
+    }
+
+    public int getPC() {
+        return pc;
+    }
+
+    public void setPC(int value) {
+        pc = value;
+    }
+
+    public void incPC(){
+        ++pc;
     }
 }
