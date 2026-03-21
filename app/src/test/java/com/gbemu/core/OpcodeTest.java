@@ -199,4 +199,134 @@ public class OpcodeTest {
         assertThat(cpu.step()).as("jr c u16 cycles = 12").isEqualTo(12);
         assertThat(reg.getPC()).isEqualTo(0x0003);
     }
+
+    @Test
+    void test_call_u16() {
+        reg.setSP(0x3000);
+        mmu.writeByte(0x0000, 0xCD);
+        mmu.writeByte(0x0001, 0x00);
+        mmu.writeByte(0x0002, 0x10);
+        assertThat(cpu.step()).as("call u16 cycles = 24").isEqualTo(24);
+        assertThat(reg.getPC()).isEqualTo(0x1000);
+        assertThat(reg.getSP()).isEqualTo(0x2FFE);
+    }
+
+    @Test
+    void test_ret() {
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xC9);
+        assertThat(cpu.step()).as("ret cycles = 16").isEqualTo(16);
+        assertThat(reg.getPC()).isEqualTo(0x0150);
+        assertThat(reg.getSP()).isEqualTo(0xFFFE);
+    }
+
+    @Test
+    void test_ret_nz_takesJump() {
+        reg.setFlagZ(false);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xC0);
+        assertThat(cpu.step()).as("ret nz cycles = 16").isEqualTo(16);
+        assertThat(reg.getPC()).isEqualTo(0x0150);
+        assertThat(reg.getSP()).isEqualTo(0xFFFE);
+    }
+
+    @Test
+    void test_ret_nz_fallsThrough() {
+        reg.setFlagZ(true);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xC0);
+        assertThat(cpu.step()).as("ret nz cycles = 8").isEqualTo(8);
+        assertThat(reg.getPC()).isEqualTo(0x0001);
+        assertThat(reg.getSP()).isEqualTo(0xFFFC);
+    }
+
+    @Test
+    void test_ret_z_takesJump() {
+        reg.setFlagZ(true);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xC8);
+        assertThat(cpu.step()).as("ret z cycles = 16").isEqualTo(16);
+        assertThat(reg.getPC()).isEqualTo(0x0150);
+        assertThat(reg.getSP()).isEqualTo(0xFFFE);
+    }
+
+    @Test
+    void test_ret_z_fallsThrough() {
+        reg.setFlagZ(false);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xC8);
+        assertThat(cpu.step()).as("ret z cycles = 8").isEqualTo(8);
+        assertThat(reg.getPC()).isEqualTo(0x0001);
+        assertThat(reg.getSP()).isEqualTo(0xFFFC);
+    }
+
+    @Test
+    void test_ret_nc_takesJump() {
+        reg.setFlagC(false);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xD0);
+        assertThat(cpu.step()).as("ret nc cycles = 16").isEqualTo(16);
+        assertThat(reg.getPC()).isEqualTo(0x0150);
+        assertThat(reg.getSP()).isEqualTo(0xFFFE);
+    }
+
+    @Test
+    void test_ret_nc_fallsThrough() {
+        reg.setFlagC(true);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xD0);
+        assertThat(cpu.step()).as("ret nc cycles = 8").isEqualTo(8);
+        assertThat(reg.getPC()).isEqualTo(0x0001);
+        assertThat(reg.getSP()).isEqualTo(0xFFFC);
+    }
+
+    @Test
+    void test_ret_c_takesJump() {
+        reg.setFlagC(true);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xD8);
+        assertThat(cpu.step()).as("ret c cycles = 16").isEqualTo(16);
+        assertThat(reg.getPC()).isEqualTo(0x0150);
+        assertThat(reg.getSP()).isEqualTo(0xFFFE);
+    }
+
+    @Test
+    void test_ret_c_fallsThrough() {
+        reg.setFlagZ(false);
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xD8);
+        assertThat(cpu.step()).as("ret c cycles = 8").isEqualTo(8);
+        assertThat(reg.getPC()).isEqualTo(0x0001);
+        assertThat(reg.getSP()).isEqualTo(0xFFFC);
+    }
+
+    @Test
+    void test_halt() {
+        mmu.writeByte(0x0000, 0x76);
+        mmu.writeByte(0x0001, 0xD8);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        assertThat(cpu.step()).as("halt cycles = 4").isEqualTo(4);
+        int pc = reg.getPC();
+        assertThat(cpu.step()).as("halt cycles = 4, no further excecution occurs").isEqualTo(4);
+        assertThat(pc).as("pc does not increment").isEqualTo(reg.getPC());
+    }
 }
