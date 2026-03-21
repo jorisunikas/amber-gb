@@ -9,19 +9,21 @@ public class CPU {
         this.mmu = mmu;
     }
 
-    public void step() {
+    public int step() {
         int opcode = fetch();
-        excecute(opcode);
+        int cycles = 0;
+        switch (opcode) {
+            case 0x00 -> cycles = 4; // NOP
+            default -> System.out.println("Unimplemented opcode: 0x" +
+                    Integer.toHexString(opcode));
+
+        }
+        return cycles;
     }
 
     private int fetch() {
         int opcode = mmu.readByte(registers.pc);
         registers.incPC();
         return opcode;
-    }
-
-    private void excecute(int opcode) {
-        switch (opcode) {
-        }
     }
 }
