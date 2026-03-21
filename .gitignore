@@ -1,0 +1,29 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Gradle
+.gradle/
+build/
+app/build/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Compiled
+*.class
+*.jar
+
+# Logs
+*.log
