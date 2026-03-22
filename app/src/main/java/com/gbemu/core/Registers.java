@@ -128,7 +128,6 @@ public class Registers {
     }
 
     public void setAF(int value) {
-        // right shift ir tada AND
         a = (value >> 8) & 0xFF;
         setF(value & 0xFF);
     }
@@ -176,19 +175,41 @@ public class Registers {
         pc = value & 0xFFFF;
     }
 
-    public void incPC() {
-        ++pc;
-    }
+    // @formatter:off
+    public void incA() { setA(a + 1); }
+    public void decA() { setA(a - 1); }
 
-    public void decPC() {
-        --pc;
-    }
+    public void incB() { setB(b + 1); }
+    public void decB() { setB(b - 1); }
 
-    public void incSP() {
-        ++sp;
-    }
+    public void incC() { setC(c + 1); }
+    public void decC() { setC(c - 1); }
 
-    public void decSP() {
-        --sp;
-    }
+    public void incD() { setD(d + 1); }
+    public void decD() { setD(d - 1); }
+
+    public void incE() { setE(e + 1); }
+    public void decE() { setE(e - 1); }
+
+    public void incH() { setH(h + 1); }
+    public void decH() { setH(h - 1); }
+
+    public void incL() { setL(l + 1); }
+    public void decL() { setL(l - 1); }
+
+    public void incBC() { setBC(getBC() + 1); }
+    public void decBC() { setBC(getBC() - 1); }
+
+    public void incDE() { setDE(getDE() + 1); }
+    public void decDE() { setDE(getDE() - 1); }
+
+    public void incHL() { setHL(getHL() + 1); }
+    public void decHL() { setHL(getHL() - 1); }
+
+    public void incSP() { setSP(getSP() + 1); }
+    public void decSP() { setSP(getSP() - 1); }
+
+    public void incPC() { setPC(getPC() + 1); }
+    public void decPC() { setPC(getPC() - 1); }
+    // @formatter:on
 }
