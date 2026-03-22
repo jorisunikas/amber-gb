@@ -60,6 +60,7 @@ public class CPU {
         opcodes[0x28] = this::jr_z_s8;
         opcodes[0x2E] = this::ld_l_u8;
         opcodes[0x30] = this::jr_nc_s8;
+        opcodes[0x36] = this::ld_hlptr_u8;
         opcodes[0x38] = this::jr_c_s8;
         opcodes[0x3E] = this::ld_a_u8;
 
@@ -195,6 +196,11 @@ public class CPU {
     }
 
     /* OPCODES */
+
+    private void ld_hlptr_u8() {
+        mmu.writeByte(reg.getHL(), fetch());
+        cycles = 12;
+    }
 
     private void ld_u16ptr_a() {
         int address = get_u16();

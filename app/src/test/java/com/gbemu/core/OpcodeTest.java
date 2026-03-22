@@ -911,8 +911,8 @@ public class OpcodeTest {
         assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
     }
 
-    @Test 
-    void test_ld_a_u16ptr(){
+    @Test
+    void test_ld_a_u16ptr() {
         mmu.writeByte(0x0000, 0xFA);
         mmu.writeByte(0x0001, 0x00);
         mmu.writeByte(0x0002, 0x30);
@@ -928,6 +928,15 @@ public class OpcodeTest {
         mmu.writeByte(0x0001, 0x00);
         mmu.writeByte(0x0002, 0x30);
         assertThat(cpu.step()).isEqualTo(16);
+        assertThat(mmu.readByte(0x3000)).isEqualTo(0x42);
+    }
+
+    @Test 
+    void test_ld_hlptr_u8(){
+        reg.setHL(0x3000);
+        mmu.writeByte(0x0000, 0x36);
+        mmu.writeByte(0x0001, 0x42);
+        assertThat(cpu.step()).isEqualTo(12);
         assertThat(mmu.readByte(0x3000)).isEqualTo(0x42);
     }
 }
