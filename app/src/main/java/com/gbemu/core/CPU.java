@@ -53,16 +53,19 @@ public class CPU {
         opcodes[0x02] = this::ld_bcptr_a;
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x0E] = this::ld_c_u8;
+
         opcodes[0x12] = this::ld_deptr_a;
         opcodes[0x16] = this::ld_d_u8;
         opcodes[0x18] = this::jr_s8;
         opcodes[0x1E] = this::ld_e_u8;
+
         opcodes[0x20] = this::jr_nz_s8;
         opcodes[0x22] = this::ld_hlptr_a_inc;
         opcodes[0x26] = this::ld_h_u8;
         opcodes[0x28] = this::jr_z_s8;
         opcodes[0x2A] = this::ld_a_hlptr_inc;
         opcodes[0x2E] = this::ld_l_u8;
+
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x32] = this::ld_hlptr_a_dec;
         opcodes[0x36] = this::ld_hlptr_u8;
@@ -78,7 +81,6 @@ public class CPU {
         opcodes[0x45] = this::ld_b_l;
         opcodes[0x46] = this::ld_b_hlptr;
         opcodes[0x47] = this::ld_b_a;
-
         opcodes[0x48] = this::ld_c_b;
         opcodes[0x49] = this::ld_c_c;
         opcodes[0x4A] = this::ld_c_d;
@@ -96,7 +98,6 @@ public class CPU {
         opcodes[0x55] = this::ld_d_l;
         opcodes[0x56] = this::ld_d_hlptr;
         opcodes[0x57] = this::ld_d_a;
-
         opcodes[0x58] = this::ld_e_b;
         opcodes[0x59] = this::ld_e_c;
         opcodes[0x5A] = this::ld_e_d;
@@ -114,7 +115,6 @@ public class CPU {
         opcodes[0x65] = this::ld_h_l;
         opcodes[0x66] = this::ld_h_hlptr;
         opcodes[0x67] = this::ld_h_a;
-
         opcodes[0x68] = this::ld_l_b;
         opcodes[0x69] = this::ld_l_c;
         opcodes[0x6A] = this::ld_l_d;
@@ -132,7 +132,6 @@ public class CPU {
         opcodes[0x75] = this::ld_hlptr_l;
         opcodes[0x76] = this::halt;
         opcodes[0x77] = this::ld_hlptr_a;
-
         opcodes[0x78] = this::ld_a_b;
         opcodes[0x79] = this::ld_a_c;
         opcodes[0x7A] = this::ld_a_d;
@@ -149,11 +148,16 @@ public class CPU {
         opcodes[0xC9] = this::ret;
         opcodes[0xCA] = this::jp_z_u16;
         opcodes[0xCD] = this::call_u16;
+
         opcodes[0xD0] = this::ret_nc;
         opcodes[0xD2] = this::jp_nc_u16;
         opcodes[0xD8] = this::ret_c;
         opcodes[0xDA] = this::jp_c_u16;
+
+        opcodes[0xE0] = this::ldh_u8ptr_a;
         opcodes[0xEA] = this::ld_u16ptr_a;
+
+        opcodes[0xF0] = this::ldh_a_u8ptr;
         opcodes[0xF3] = this::di;
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
@@ -201,38 +205,48 @@ public class CPU {
         cycles = 12;
     }
 
-    private void ld_rrptr_r_helper(IntSupplier getRR, IntSupplier getR){
+    private void ld_rrptr_r_helper(IntSupplier getRR, IntSupplier getR) {
         mmu.writeByte(getRR.getAsInt(), getR.getAsInt());
         cycles = 8;
     }
 
     /* OPCODES */
 
-    private void ld_a_hlptr_inc(){
+    private void ldh_u8ptr_a() {
+        mmu.writeByte((fetch() & 0xFF) | 0xFF00, reg.getA());
+        cycles = 12;
+    }
+
+    private void ldh_a_u8ptr() {
+        reg.setA(mmu.readByte((fetch() & 0xFF) | 0xFF00));
+        cycles = 12;
+    }
+
+    private void ld_a_hlptr_inc() {
         ld_a_hlptr();
         reg.incHL();
     }
 
-    private void ld_a_hlptr_dec(){
+    private void ld_a_hlptr_dec() {
         ld_a_hlptr();
         reg.decHL();
     }
-    
-    private void ld_hlptr_a_inc(){
+
+    private void ld_hlptr_a_inc() {
         ld_rrptr_r_helper(reg::getHL, reg::getA);
         reg.incHL();
     }
 
-    private void ld_hlptr_a_dec(){
+    private void ld_hlptr_a_dec() {
         ld_rrptr_r_helper(reg::getHL, reg::getA);
         reg.decHL();
     }
 
-    private void ld_bcptr_a(){
+    private void ld_bcptr_a() {
         ld_rrptr_r_helper(reg::getBC, reg::getA);
     }
 
-    private void ld_deptr_a(){
+    private void ld_deptr_a() {
         ld_rrptr_r_helper(reg::getDE, reg::getA);
     }
 
