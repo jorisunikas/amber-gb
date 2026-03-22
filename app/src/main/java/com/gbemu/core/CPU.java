@@ -50,15 +50,18 @@ public class CPU {
 
     private void initOpcodes() {
         opcodes[0x00] = () -> cycles = 4;
+        opcodes[0x01] = this::ld_bc_u16;
         opcodes[0x02] = this::ld_bcptr_a;
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x0E] = this::ld_c_u8;
 
+        opcodes[0x11] = this::ld_de_u16;
         opcodes[0x12] = this::ld_deptr_a;
         opcodes[0x16] = this::ld_d_u8;
         opcodes[0x18] = this::jr_s8;
         opcodes[0x1E] = this::ld_e_u8;
 
+        opcodes[0x21] = this::ld_hl_u16;
         opcodes[0x20] = this::jr_nz_s8;
         opcodes[0x22] = this::ld_hlptr_a_inc;
         opcodes[0x26] = this::ld_h_u8;
@@ -67,6 +70,7 @@ public class CPU {
         opcodes[0x2E] = this::ld_l_u8;
 
         opcodes[0x30] = this::jr_nc_s8;
+        opcodes[0x31] = this::ld_sp_u16;
         opcodes[0x32] = this::ld_hlptr_a_dec;
         opcodes[0x36] = this::ld_hlptr_u8;
         opcodes[0x38] = this::jr_c_s8;
@@ -210,7 +214,28 @@ public class CPU {
         cycles = 8;
     }
 
+    private void ld_rr_u16_helper(IntConsumer setter){
+        setter.accept(get_u16());
+        cycles = 12;
+    }
+
     /* OPCODES */
+
+    private void ld_bc_u16(){
+        ld_rr_u16_helper(reg::setBC);
+    }
+
+    private void ld_de_u16(){
+        ld_rr_u16_helper(reg::setDE);
+    }
+
+    private void ld_hl_u16(){
+        ld_rr_u16_helper(reg::setHL);
+    }
+
+    private void ld_sp_u16(){
+        ld_rr_u16_helper(reg::setSP);
+    }
 
     private void ldh_u8ptr_a() {
         mmu.writeByte((fetch() & 0xFF) | 0xFF00, reg.getA());
