@@ -957,4 +957,24 @@ public class OpcodeTest {
         assertThat(cpu.step()).isEqualTo(8);
         assertThat(mmu.readByte(0x3000)).isEqualTo(0x42);
     }
+
+    @Test
+    void test_ld_hlptr_a_inc(){
+        reg.setHL(0x8000);
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x22);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
+        assertThat(reg.getHL()).isEqualTo(0x8001);
+    }
+
+    @Test
+    void test_ld_hlptr_a_dec(){
+        reg.setHL(0x8000);
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x32);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
+        assertThat(reg.getHL()).isEqualTo(0x7FFF);
+    }
 }
