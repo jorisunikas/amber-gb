@@ -1,9 +1,10 @@
 package com.gbemu.core;
 
 import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 
 public class CPU {
-    private final Registers registers;
+    private final Registers reg;
     private final MMU mmu;
     private int cycles;
     private final Runnable[] opcodes;
@@ -17,7 +18,7 @@ public class CPU {
     public CPU(MMU mmu, Registers reg) {
         this.mmu = mmu;
 
-        registers = reg;
+        this.reg = reg;
         opcodes = new Runnable[256];
 
         cycles = 0;
@@ -41,8 +42,8 @@ public class CPU {
     }
 
     private int fetch() {
-        int opcode = mmu.readByte(registers.getPC());
-        registers.incPC();
+        int opcode = mmu.readByte(reg.getPC());
+        reg.incPC();
         return opcode;
     }
 
@@ -60,6 +61,63 @@ public class CPU {
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x38] = this::jr_c_s8;
         opcodes[0x3E] = this::ld_a_u8;
+
+        opcodes[0x40] = this::ld_b_b;
+        opcodes[0x41] = this::ld_b_c;
+        opcodes[0x42] = this::ld_b_d;
+        opcodes[0x43] = this::ld_b_e;
+        opcodes[0x44] = this::ld_b_h;
+        opcodes[0x45] = this::ld_b_l;
+        opcodes[0x47] = this::ld_b_a;
+
+        opcodes[0x48] = this::ld_c_b;
+        opcodes[0x49] = this::ld_c_c;
+        opcodes[0x4A] = this::ld_c_d;
+        opcodes[0x4B] = this::ld_c_e;
+        opcodes[0x4C] = this::ld_c_h;
+        opcodes[0x4D] = this::ld_c_l;
+        opcodes[0x4F] = this::ld_c_a;
+
+        opcodes[0x50] = this::ld_d_b;
+        opcodes[0x51] = this::ld_d_c;
+        opcodes[0x52] = this::ld_d_d;
+        opcodes[0x53] = this::ld_d_e;
+        opcodes[0x54] = this::ld_d_h;
+        opcodes[0x55] = this::ld_d_l;
+        opcodes[0x57] = this::ld_d_a;
+
+        opcodes[0x58] = this::ld_e_b;
+        opcodes[0x59] = this::ld_e_c;
+        opcodes[0x5A] = this::ld_e_d;
+        opcodes[0x5B] = this::ld_e_e;
+        opcodes[0x5C] = this::ld_e_h;
+        opcodes[0x5D] = this::ld_e_l;
+        opcodes[0x5F] = this::ld_e_a;
+
+        opcodes[0x60] = this::ld_h_b;
+        opcodes[0x61] = this::ld_h_c;
+        opcodes[0x62] = this::ld_h_d;
+        opcodes[0x63] = this::ld_h_e;
+        opcodes[0x64] = this::ld_h_h;
+        opcodes[0x65] = this::ld_h_l;
+        opcodes[0x67] = this::ld_h_a;
+
+        opcodes[0x68] = this::ld_l_b;
+        opcodes[0x69] = this::ld_l_c;
+        opcodes[0x6A] = this::ld_l_d;
+        opcodes[0x6B] = this::ld_l_e;
+        opcodes[0x6C] = this::ld_l_h;
+        opcodes[0x6D] = this::ld_l_l;
+        opcodes[0x6F] = this::ld_l_a;
+
+        opcodes[0x78] = this::ld_a_b;
+        opcodes[0x79] = this::ld_a_c;
+        opcodes[0x7A] = this::ld_a_d;
+        opcodes[0x7B] = this::ld_a_e;
+        opcodes[0x7C] = this::ld_a_h;
+        opcodes[0x7D] = this::ld_a_l;
+        opcodes[0x7F] = this::ld_a_a;
+
         opcodes[0x76] = this::halt;
         opcodes[0xC0] = this::ret_nz;
         opcodes[0xC2] = this::jp_nz_u16;
@@ -95,33 +153,245 @@ public class CPU {
         ime = true;
         cycles = 4;
     }
+    /* ld A, r */
+
+    private void ld_a_b() {
+        ld_r_r_helper(reg::setA, reg::getB);
+    }
+
+    private void ld_a_c() {
+        ld_r_r_helper(reg::setA, reg::getC);
+    }
+
+    private void ld_a_d() {
+        ld_r_r_helper(reg::setA, reg::getD);
+    }
+
+    private void ld_a_e() {
+        ld_r_r_helper(reg::setA, reg::getE);
+    }
+
+    private void ld_a_h() {
+        ld_r_r_helper(reg::setA, reg::getH);
+    }
+
+    private void ld_a_l() {
+        ld_r_r_helper(reg::setA, reg::getL);
+    }
+
+    private void ld_a_a() {
+        ld_r_r_helper(reg::setA, reg::getA);
+    }
+    /* ld H, r */
+
+    private void ld_h_b() {
+        ld_r_r_helper(reg::setH, reg::getB);
+    }
+
+    private void ld_h_c() {
+        ld_r_r_helper(reg::setH, reg::getC);
+    }
+
+    private void ld_h_d() {
+        ld_r_r_helper(reg::setH, reg::getD);
+    }
+
+    private void ld_h_e() {
+        ld_r_r_helper(reg::setH, reg::getE);
+    }
+
+    private void ld_h_h() {
+        ld_r_r_helper(reg::setH, reg::getH);
+    }
+
+    private void ld_h_l() {
+        ld_r_r_helper(reg::setH, reg::getL);
+    }
+
+    private void ld_h_a() {
+        ld_r_r_helper(reg::setH, reg::getA);
+    }
+
+    /* ld L, r */
+
+    private void ld_l_b() {
+        ld_r_r_helper(reg::setL, reg::getB);
+    }
+
+    private void ld_l_c() {
+        ld_r_r_helper(reg::setL, reg::getC);
+    }
+
+    private void ld_l_d() {
+        ld_r_r_helper(reg::setL, reg::getD);
+    }
+
+    private void ld_l_e() {
+        ld_r_r_helper(reg::setL, reg::getE);
+    }
+
+    private void ld_l_h() {
+        ld_r_r_helper(reg::setL, reg::getH);
+    }
+
+    private void ld_l_l() {
+        ld_r_r_helper(reg::setL, reg::getL);
+    }
+
+    private void ld_l_a() {
+        ld_r_r_helper(reg::setL, reg::getA);
+    }
+
+    /* ld E, r */
+
+    private void ld_e_b() {
+        ld_r_r_helper(reg::setE, reg::getB);
+    }
+
+    private void ld_e_c() {
+        ld_r_r_helper(reg::setE, reg::getC);
+    }
+
+    private void ld_e_d() {
+        ld_r_r_helper(reg::setE, reg::getD);
+    }
+
+    private void ld_e_e() {
+        ld_r_r_helper(reg::setE, reg::getE);
+    }
+
+    private void ld_e_h() {
+        ld_r_r_helper(reg::setE, reg::getH);
+    }
+
+    private void ld_e_l() {
+        ld_r_r_helper(reg::setE, reg::getL);
+    }
+
+    private void ld_e_a() {
+        ld_r_r_helper(reg::setE, reg::getA);
+    }
+    /* ld D, r */
+
+    private void ld_d_b() {
+        ld_r_r_helper(reg::setD, reg::getB);
+    }
+
+    private void ld_d_c() {
+        ld_r_r_helper(reg::setD, reg::getC);
+    }
+
+    private void ld_d_d() {
+        ld_r_r_helper(reg::setD, reg::getD);
+    }
+
+    private void ld_d_e() {
+        ld_r_r_helper(reg::setD, reg::getE);
+    }
+
+    private void ld_d_h() {
+        ld_r_r_helper(reg::setD, reg::getH);
+    }
+
+    private void ld_d_l() {
+        ld_r_r_helper(reg::setD, reg::getL);
+    }
+
+    private void ld_d_a() {
+        ld_r_r_helper(reg::setD, reg::getA);
+    }
+
+    /* ld C, r */
+
+    private void ld_c_b() {
+        ld_r_r_helper(reg::setC, reg::getB);
+    }
+
+    private void ld_c_c() {
+        ld_r_r_helper(reg::setC, reg::getC);
+    }
+
+    private void ld_c_d() {
+        ld_r_r_helper(reg::setC, reg::getD);
+    }
+
+    private void ld_c_e() {
+        ld_r_r_helper(reg::setC, reg::getE);
+    }
+
+    private void ld_c_h() {
+        ld_r_r_helper(reg::setC, reg::getH);
+    }
+
+    private void ld_c_l() {
+        ld_r_r_helper(reg::setC, reg::getL);
+    }
+
+    private void ld_c_a() {
+        ld_r_r_helper(reg::setC, reg::getA);
+    }
+
+    /* ld B, r */
+
+    private void ld_b_b() {
+        ld_r_r_helper(reg::setB, reg::getB);
+    }
+
+    private void ld_b_c() {
+        ld_r_r_helper(reg::setB, reg::getC);
+    }
+
+    private void ld_b_d() {
+        ld_r_r_helper(reg::setB, reg::getD);
+    }
+
+    private void ld_b_e() {
+        ld_r_r_helper(reg::setB, reg::getE);
+    }
+
+    private void ld_b_h() {
+        ld_r_r_helper(reg::setB, reg::getH);
+    }
+
+    private void ld_b_l() {
+        ld_r_r_helper(reg::setB, reg::getL);
+    }
+
+    private void ld_b_a() {
+        ld_r_r_helper(reg::setB, reg::getA);
+    }
+
+    private void ld_r_r_helper(IntConsumer setter, IntSupplier getter) {
+        setter.accept(getter.getAsInt());
+        cycles = 4;
+    }
 
     private void ld_b_u8() {
-        ld_u8_helper(registers::setB);
+        ld_u8_helper(reg::setB);
     }
 
     private void ld_c_u8() {
-        ld_u8_helper(registers::setC);
+        ld_u8_helper(reg::setC);
     }
 
     private void ld_d_u8() {
-        ld_u8_helper(registers::setD);
+        ld_u8_helper(reg::setD);
     }
 
     private void ld_e_u8() {
-        ld_u8_helper(registers::setE);
+        ld_u8_helper(reg::setE);
     }
 
     private void ld_h_u8() {
-        ld_u8_helper(registers::setH);
+        ld_u8_helper(reg::setH);
     }
 
     private void ld_l_u8() {
-        ld_u8_helper(registers::setL);
+        ld_u8_helper(reg::setL);
     }
 
     private void ld_a_u8() {
-        ld_u8_helper(registers::setA);
+        ld_u8_helper(reg::setA);
     }
 
     private void ld_u8_helper(IntConsumer setter) {
@@ -134,23 +404,23 @@ public class CPU {
         int high = fetch();
         int address = high << 8 | low;
 
-        registers.decSP();
-        mmu.writeByte(registers.getSP(), (registers.getPC() >> 8) & 0xFF);
-        registers.decSP();
-        mmu.writeByte(registers.getSP(), (registers.getPC() & 0xFF));
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), (reg.getPC() >> 8) & 0xFF);
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), (reg.getPC() & 0xFF));
 
-        registers.setPC(address);
+        reg.setPC(address);
         cycles = 24;
 
     }
 
     private void ret() {
-        int low = mmu.readByte(registers.getSP());
-        registers.incSP();
-        int high = mmu.readByte(registers.getSP());
-        registers.incSP();
+        int low = mmu.readByte(reg.getSP());
+        reg.incSP();
+        int high = mmu.readByte(reg.getSP());
+        reg.incSP();
 
-        registers.setPC(high << 8 | low);
+        reg.setPC(high << 8 | low);
         cycles = 16;
     }
 
@@ -163,31 +433,31 @@ public class CPU {
     }
 
     private void ret_nz() {
-        ret_flag_helper(!registers.isFlagZ());
+        ret_flag_helper(!reg.isFlagZ());
     }
 
     private void ret_z() {
-        ret_flag_helper(registers.isFlagZ());
+        ret_flag_helper(reg.isFlagZ());
     }
 
     private void ret_nc() {
-        ret_flag_helper(!registers.isFlagC());
+        ret_flag_helper(!reg.isFlagC());
     }
 
     private void ret_c() {
-        ret_flag_helper(registers.isFlagC());
+        ret_flag_helper(reg.isFlagC());
     }
 
     private void jp_u16() {
         int low = fetch();
         int high = fetch();
-        registers.setPC(high << 8 | low);
+        reg.setPC(high << 8 | low);
         cycles = 16;
     }
 
     private void jr_s8() {
         int offset = (byte) fetch();
-        registers.setPC(registers.getPC() + offset);
+        reg.setPC(reg.getPC() + offset);
         cycles = 12;
     }
 
@@ -212,34 +482,34 @@ public class CPU {
     }
 
     private void jr_nz_s8() {
-        jump_flag_s8_helper(!registers.isFlagZ());
+        jump_flag_s8_helper(!reg.isFlagZ());
     }
 
     private void jr_z_s8() {
-        jump_flag_s8_helper(registers.isFlagZ());
+        jump_flag_s8_helper(reg.isFlagZ());
     }
 
     private void jr_nc_s8() {
-        jump_flag_s8_helper(!registers.isFlagC());
+        jump_flag_s8_helper(!reg.isFlagC());
     }
 
     private void jr_c_s8() {
-        jump_flag_s8_helper(registers.isFlagC());
+        jump_flag_s8_helper(reg.isFlagC());
     }
 
     private void jp_nz_u16() {
-        jump_flag_u16_helper(!registers.isFlagZ());
+        jump_flag_u16_helper(!reg.isFlagZ());
     }
 
     private void jp_z_u16() {
-        jump_flag_u16_helper(registers.isFlagZ());
+        jump_flag_u16_helper(reg.isFlagZ());
     }
 
     private void jp_nc_u16() {
-        jump_flag_u16_helper(!registers.isFlagC());
+        jump_flag_u16_helper(!reg.isFlagC());
     }
 
     private void jp_c_u16() {
-        jump_flag_u16_helper(registers.isFlagC());
+        jump_flag_u16_helper(reg.isFlagC());
     }
 }

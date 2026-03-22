@@ -331,7 +331,7 @@ public class OpcodeTest {
     }
 
     @Test
-    void test_ld_b_u8(){
+    void test_ld_b_u8() {
         mmu.writeByte(0x0000, 0x06);
         mmu.writeByte(0x0001, 0x20);
         assertThat(cpu.step()).as("ld b, u8 = 8").isEqualTo(8);
@@ -339,7 +339,7 @@ public class OpcodeTest {
     }
 
     @Test
-    void test_ld_c_u8(){
+    void test_ld_c_u8() {
         mmu.writeByte(0x0000, 0x0E);
         mmu.writeByte(0x0001, 0x20);
         assertThat(cpu.step()).as("ld c, u8 = 8").isEqualTo(8);
@@ -347,7 +347,7 @@ public class OpcodeTest {
     }
 
     @Test
-    void test_ld_d_u8(){
+    void test_ld_d_u8() {
         mmu.writeByte(0x0000, 0x16);
         mmu.writeByte(0x0001, 0x20);
         assertThat(cpu.step()).as("ld d, u8 = 8").isEqualTo(8);
@@ -355,7 +355,7 @@ public class OpcodeTest {
     }
 
     @Test
-    void test_ld_e_u8(){
+    void test_ld_e_u8() {
         mmu.writeByte(0x0000, 0x1E);
         mmu.writeByte(0x0001, 0x20);
         assertThat(cpu.step()).as("ld e, u8 = 8").isEqualTo(8);
@@ -363,7 +363,7 @@ public class OpcodeTest {
     }
 
     @Test
-    void test_ld_h_u8(){
+    void test_ld_h_u8() {
         mmu.writeByte(0x0000, 0x26);
         mmu.writeByte(0x0001, 0x20);
         assertThat(cpu.step()).as("ld h, u8 = 8").isEqualTo(8);
@@ -371,7 +371,7 @@ public class OpcodeTest {
     }
 
     @Test
-    void test_ld_l_u8(){
+    void test_ld_l_u8() {
         mmu.writeByte(0x0000, 0x2E);
         mmu.writeByte(0x0001, 0x20);
         assertThat(cpu.step()).as("ld l, u8 = 8").isEqualTo(8);
@@ -379,10 +379,409 @@ public class OpcodeTest {
     }
 
     @Test
-    void test_ld_a_u8(){
+    void test_ld_a_u8() {
         mmu.writeByte(0x0000, 0x3E);
         mmu.writeByte(0x0001, 0x20);
         assertThat(cpu.step()).as("ld a, u8 = 8").isEqualTo(8);
         assertThat(reg.getA()).isEqualTo(0x20);
+    }
+
+    // LD B, r
+    @Test
+    void test_ld_b_b() {
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x40);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_b_c() {
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x41);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_b_d() {
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x42);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_b_e() {
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x43);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_b_h() {
+        reg.setH(0x42);
+        mmu.writeByte(0x0000, 0x44);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_b_l() {
+        reg.setL(0x42);
+        mmu.writeByte(0x0000, 0x45);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_b_a() {
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x47);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    // LD C, r
+    @Test
+    void test_ld_c_b() {
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x48);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_c_c() {
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x49);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_c_d() {
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x4A);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_c_e() {
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x4B);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_c_h() {
+        reg.setH(0x42);
+        mmu.writeByte(0x0000, 0x4C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_c_l() {
+        reg.setL(0x42);
+        mmu.writeByte(0x0000, 0x4D);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_c_a() {
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x4F);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    // LD D, r
+    @Test
+    void test_ld_d_b() {
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x50);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_d_c() {
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x51);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_d_d() {
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x52);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_d_e() {
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x53);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_d_h() {
+        reg.setH(0x42);
+        mmu.writeByte(0x0000, 0x54);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_d_l() {
+        reg.setL(0x42);
+        mmu.writeByte(0x0000, 0x55);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_d_a() {
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x57);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    // LD E, r
+    @Test
+    void test_ld_e_b() {
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x58);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_e_c() {
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x59);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_e_d() {
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x5A);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_e_e() {
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x5B);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_e_h() {
+        reg.setH(0x42);
+        mmu.writeByte(0x0000, 0x5C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_e_l() {
+        reg.setL(0x42);
+        mmu.writeByte(0x0000, 0x5D);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_e_a() {
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x5F);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    // LD H, r
+    @Test
+    void test_ld_h_b() {
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x60);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_h_c() {
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x61);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_h_d() {
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x62);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_h_e() {
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x63);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_h_h() {
+        reg.setH(0x42);
+        mmu.writeByte(0x0000, 0x64);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_h_l() {
+        reg.setL(0x42);
+        mmu.writeByte(0x0000, 0x65);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_h_a() {
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x67);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    // LD L, r
+    @Test
+    void test_ld_l_b() {
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x68);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_l_c() {
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x69);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_l_d() {
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x6A);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_l_e() {
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x6B);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_l_h() {
+        reg.setH(0x42);
+        mmu.writeByte(0x0000, 0x6C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_l_l() {
+        reg.setL(0x42);
+        mmu.writeByte(0x0000, 0x6D);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_l_a() {
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x6F);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    // LD A, r
+    @Test
+    void test_ld_a_b() {
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x78);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_a_c() {
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x79);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_a_d() {
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x7A);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_a_e() {
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x7B);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_a_h() {
+        reg.setH(0x42);
+        mmu.writeByte(0x0000, 0x7C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_a_l() {
+        reg.setL(0x42);
+        mmu.writeByte(0x0000, 0x7D);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_a_a() {
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x7F);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x42);
     }
 }
