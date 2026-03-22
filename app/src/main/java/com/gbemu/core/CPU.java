@@ -2,6 +2,7 @@ package com.gbemu.core;
 
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
+import java.util.zip.Adler32;
 
 public class CPU {
     private final Registers reg;
@@ -136,6 +137,7 @@ public class CPU {
 
         opcodes[0xC0] = this::ret_nz;
         opcodes[0xC2] = this::jp_nz_u16;
+        opcodes[0xC3] = this::jp_u16;
         opcodes[0xC8] = this::ret_z;
         opcodes[0xC9] = this::ret;
         opcodes[0xCA] = this::jp_z_u16;
@@ -144,12 +146,67 @@ public class CPU {
         opcodes[0xD2] = this::jp_nc_u16;
         opcodes[0xD8] = this::ret_c;
         opcodes[0xDA] = this::jp_c_u16;
-        opcodes[0xC3] = this::jp_u16;
+        opcodes[0xEA] = this::ld_u16ptr_a;
         opcodes[0xF3] = this::di;
+        opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
     }
 
-    // u(nsigned) vs s(igned)
+    /* HELPER FUNCTIONS */
+
+    private int get_u16() {
+        int low = fetch();
+        int high = fetch();
+        return (high << 8) | low;
+    }
+
+    private void ld_r_hlptr_helper(IntConsumer setter) {
+        setter.accept(mmu.readByte(reg.getHL()));
+        cycles = 8;
+    }
+
+    private void ld_hlptr_r_helper(IntSupplier getter) {
+        mmu.writeByte(reg.getHL(), getter.getAsInt());
+        cycles = 8;
+    }
+
+    private void ld_r_r_helper(IntConsumer setter, IntSupplier getter) {
+        setter.accept(getter.getAsInt());
+        cycles = 4;
+    }
+
+    private void jump_flag_s8_helper(boolean flag) {
+        if (flag) {
+            jr_s8();
+            return;
+        }
+        fetch();
+        cycles = 8;
+    }
+
+    private void jump_flag_u16_helper(boolean flag) {
+        if (flag) {
+            jp_u16();
+            return;
+        }
+        fetch();
+        fetch();
+        cycles = 12;
+    }
+
+    /* OPCODES */
+
+    private void ld_u16ptr_a() {
+        int address = get_u16();
+        mmu.writeByte(address, reg.getA());
+        cycles = 16;
+    }
+
+    private void ld_a_u16ptr() {
+        int address = get_u16();
+        reg.setA(mmu.readByte(address));
+        cycles = 16;
+    }
 
     // TODO implement fully
     private void halt() {
@@ -169,43 +226,33 @@ public class CPU {
         cycles = 4;
     }
 
-    private void ld_r_hlptr_helper(IntConsumer setter) {
-        setter.accept(mmu.readByte(reg.getHL()));
-        cycles = 8;
-    }
-
-    private void ld_hlptr_r_helper(IntSupplier getter) {
-        mmu.writeByte(reg.getHL(), getter.getAsInt());
-        cycles = 8;
-    }
-
     /* ld (HL), r */
 
-    private void ld_hlptr_b(){
+    private void ld_hlptr_b() {
         ld_hlptr_r_helper(reg::getB);
     }
 
-    private void ld_hlptr_c(){
+    private void ld_hlptr_c() {
         ld_hlptr_r_helper(reg::getC);
     }
 
-    private void ld_hlptr_d(){
+    private void ld_hlptr_d() {
         ld_hlptr_r_helper(reg::getD);
     }
 
-    private void ld_hlptr_e(){
+    private void ld_hlptr_e() {
         ld_hlptr_r_helper(reg::getE);
     }
 
-    private void ld_hlptr_h(){
+    private void ld_hlptr_h() {
         ld_hlptr_r_helper(reg::getH);
     }
 
-    private void ld_hlptr_l(){
+    private void ld_hlptr_l() {
         ld_hlptr_r_helper(reg::getL);
     }
 
-    private void ld_hlptr_a(){
+    private void ld_hlptr_a() {
         ld_hlptr_r_helper(reg::getA);
     }
 
@@ -445,11 +492,6 @@ public class CPU {
         ld_r_r_helper(reg::setB, reg::getA);
     }
 
-    private void ld_r_r_helper(IntConsumer setter, IntSupplier getter) {
-        setter.accept(getter.getAsInt());
-        cycles = 4;
-    }
-
     private void ld_b_u8() {
         ld_u8_helper(reg::setB);
     }
@@ -484,9 +526,7 @@ public class CPU {
     }
 
     private void call_u16() {
-        int low = fetch();
-        int high = fetch();
-        int address = high << 8 | low;
+        int address = get_u16();
 
         reg.decSP();
         mmu.writeByte(reg.getSP(), (reg.getPC() >> 8) & 0xFF);
@@ -533,35 +573,13 @@ public class CPU {
     }
 
     private void jp_u16() {
-        int low = fetch();
-        int high = fetch();
-        reg.setPC(high << 8 | low);
+        reg.setPC(get_u16());
         cycles = 16;
     }
 
     private void jr_s8() {
         int offset = (byte) fetch();
         reg.setPC(reg.getPC() + offset);
-        cycles = 12;
-    }
-
-    private void jump_flag_s8_helper(boolean flag) {
-        if (flag) {
-            jr_s8();
-            return;
-        }
-        fetch();
-        cycles = 8;
-
-    }
-
-    private void jump_flag_u16_helper(boolean flag) {
-        if (flag) {
-            jp_u16();
-            return;
-        }
-        fetch();
-        fetch();
         cycles = 12;
     }
 
