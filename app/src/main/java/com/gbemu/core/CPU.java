@@ -61,11 +61,13 @@ public class CPU {
         opcodes[0x22] = this::ld_hlptr_a_inc;
         opcodes[0x26] = this::ld_h_u8;
         opcodes[0x28] = this::jr_z_s8;
+        opcodes[0x2A] = this::ld_a_hlptr_inc;
         opcodes[0x2E] = this::ld_l_u8;
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x32] = this::ld_hlptr_a_dec;
         opcodes[0x36] = this::ld_hlptr_u8;
         opcodes[0x38] = this::jr_c_s8;
+        opcodes[0x3A] = this::ld_a_hlptr_dec;
         opcodes[0x3E] = this::ld_a_u8;
 
         opcodes[0x40] = this::ld_b_b;
@@ -206,6 +208,16 @@ public class CPU {
 
     /* OPCODES */
 
+    private void ld_a_hlptr_inc(){
+        ld_a_hlptr();
+        reg.incHL();
+    }
+
+    private void ld_a_hlptr_dec(){
+        ld_a_hlptr();
+        reg.decHL();
+    }
+    
     private void ld_hlptr_a_inc(){
         ld_rrptr_r_helper(reg::getHL, reg::getA);
         reg.incHL();
