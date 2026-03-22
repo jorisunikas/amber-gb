@@ -1,5 +1,7 @@
 package com.gbemu.core;
 
+import java.util.function.IntConsumer;
+
 public class CPU {
     private final Registers registers;
     private final MMU mmu;
@@ -20,6 +22,7 @@ public class CPU {
 
         cycles = 0;
         halted = false;
+        ime = false;
         initOpcodes();
     }
 
@@ -45,11 +48,18 @@ public class CPU {
 
     private void initOpcodes() {
         opcodes[0x00] = () -> cycles = 4;
+        opcodes[0x06] = this::ld_b_u8;
+        opcodes[0x0E] = this::ld_c_u8;
+        opcodes[0x16] = this::ld_d_u8;
         opcodes[0x18] = this::jr_s8;
+        opcodes[0x1E] = this::ld_e_u8;
         opcodes[0x20] = this::jr_nz_s8;
+        opcodes[0x26] = this::ld_h_u8;
         opcodes[0x28] = this::jr_z_s8;
+        opcodes[0x2E] = this::ld_l_u8;
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x38] = this::jr_c_s8;
+        opcodes[0x3E] = this::ld_a_u8;
         opcodes[0x76] = this::halt;
         opcodes[0xC0] = this::ret_nz;
         opcodes[0xC2] = this::jp_nz_u16;
@@ -84,6 +94,39 @@ public class CPU {
     private void ei() {
         ime = true;
         cycles = 4;
+    }
+
+    private void ld_b_u8() {
+        ld_u8_helper(registers::setB);
+    }
+
+    private void ld_c_u8() {
+        ld_u8_helper(registers::setC);
+    }
+
+    private void ld_d_u8() {
+        ld_u8_helper(registers::setD);
+    }
+
+    private void ld_e_u8() {
+        ld_u8_helper(registers::setE);
+    }
+
+    private void ld_h_u8() {
+        ld_u8_helper(registers::setH);
+    }
+
+    private void ld_l_u8() {
+        ld_u8_helper(registers::setL);
+    }
+
+    private void ld_a_u8() {
+        ld_u8_helper(registers::setA);
+    }
+
+    private void ld_u8_helper(IntConsumer setter) {
+        setter.accept(fetch());
+        cycles = 8;
     }
 
     private void call_u16() {

@@ -329,4 +329,60 @@ public class OpcodeTest {
         assertThat(cpu.step()).as("halt cycles = 4, no further excecution occurs").isEqualTo(4);
         assertThat(pc).as("pc does not increment").isEqualTo(reg.getPC());
     }
+
+    @Test
+    void test_ld_b_u8(){
+        mmu.writeByte(0x0000, 0x06);
+        mmu.writeByte(0x0001, 0x20);
+        assertThat(cpu.step()).as("ld b, u8 = 8").isEqualTo(8);
+        assertThat(reg.getB()).isEqualTo(0x20);
+    }
+
+    @Test
+    void test_ld_c_u8(){
+        mmu.writeByte(0x0000, 0x0E);
+        mmu.writeByte(0x0001, 0x20);
+        assertThat(cpu.step()).as("ld c, u8 = 8").isEqualTo(8);
+        assertThat(reg.getC()).isEqualTo(0x20);
+    }
+
+    @Test
+    void test_ld_d_u8(){
+        mmu.writeByte(0x0000, 0x16);
+        mmu.writeByte(0x0001, 0x20);
+        assertThat(cpu.step()).as("ld d, u8 = 8").isEqualTo(8);
+        assertThat(reg.getD()).isEqualTo(0x20);
+    }
+
+    @Test
+    void test_ld_e_u8(){
+        mmu.writeByte(0x0000, 0x1E);
+        mmu.writeByte(0x0001, 0x20);
+        assertThat(cpu.step()).as("ld e, u8 = 8").isEqualTo(8);
+        assertThat(reg.getE()).isEqualTo(0x20);
+    }
+
+    @Test
+    void test_ld_h_u8(){
+        mmu.writeByte(0x0000, 0x26);
+        mmu.writeByte(0x0001, 0x20);
+        assertThat(cpu.step()).as("ld h, u8 = 8").isEqualTo(8);
+        assertThat(reg.getH()).isEqualTo(0x20);
+    }
+
+    @Test
+    void test_ld_l_u8(){
+        mmu.writeByte(0x0000, 0x2E);
+        mmu.writeByte(0x0001, 0x20);
+        assertThat(cpu.step()).as("ld l, u8 = 8").isEqualTo(8);
+        assertThat(reg.getL()).isEqualTo(0x20);
+    }
+
+    @Test
+    void test_ld_a_u8(){
+        mmu.writeByte(0x0000, 0x3E);
+        mmu.writeByte(0x0001, 0x20);
+        assertThat(cpu.step()).as("ld a, u8 = 8").isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0x20);
+    }
 }
