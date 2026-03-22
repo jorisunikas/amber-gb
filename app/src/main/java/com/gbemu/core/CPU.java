@@ -50,8 +50,10 @@ public class CPU {
 
     private void initOpcodes() {
         opcodes[0x00] = () -> cycles = 4;
+        opcodes[0x02] = this::ld_bcptr_a;
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x0E] = this::ld_c_u8;
+        opcodes[0x12] = this::ld_deptr_a;
         opcodes[0x16] = this::ld_d_u8;
         opcodes[0x18] = this::jr_s8;
         opcodes[0x1E] = this::ld_e_u8;
@@ -195,7 +197,21 @@ public class CPU {
         cycles = 12;
     }
 
+    private void ld_rrptr_r_helper(IntSupplier getRR, IntSupplier getR){
+        mmu.writeByte(getRR.getAsInt(), getR.getAsInt());
+        cycles = 8;
+    }
+
     /* OPCODES */
+
+
+    private void ld_bcptr_a(){
+        ld_rrptr_r_helper(reg::getBC, reg::getA);
+    }
+
+    private void ld_deptr_a(){
+        ld_rrptr_r_helper(reg::getDE, reg::getA);
+    }
 
     private void ld_hlptr_u8() {
         mmu.writeByte(reg.getHL(), fetch());

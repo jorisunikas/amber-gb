@@ -939,4 +939,22 @@ public class OpcodeTest {
         assertThat(cpu.step()).isEqualTo(12);
         assertThat(mmu.readByte(0x3000)).isEqualTo(0x42);
     }
+
+    @Test
+    void test_ld_bcptr_a(){
+        reg.setBC(0x3000);
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x02);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x3000)).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_deptr_a(){
+        reg.setDE(0x3000);
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x12);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x3000)).isEqualTo(0x42);
+    }
 }
