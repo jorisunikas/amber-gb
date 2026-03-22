@@ -784,4 +784,130 @@ public class OpcodeTest {
         assertThat(cpu.step()).isEqualTo(4);
         assertThat(reg.getA()).isEqualTo(0x42);
     }
+
+    // LD r, (HL) - read from memory at HL into register
+    @Test
+    void test_ld_b_hlptr() {
+        reg.setHL(0x8000);
+        mmu.writeByte(0x8000, 0x42);
+        mmu.writeByte(0x0000, 0x46);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getB()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_c_hlptr() {
+        reg.setHL(0x8000);
+        mmu.writeByte(0x8000, 0x42);
+        mmu.writeByte(0x0000, 0x4E);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getC()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_d_hlptr() {
+        reg.setHL(0x8000);
+        mmu.writeByte(0x8000, 0x42);
+        mmu.writeByte(0x0000, 0x56);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getD()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_e_hlptr() {
+        reg.setHL(0x8000);
+        mmu.writeByte(0x8000, 0x42);
+        mmu.writeByte(0x0000, 0x5E);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getE()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_h_hlptr() {
+        reg.setHL(0x8000);
+        mmu.writeByte(0x8000, 0x42);
+        mmu.writeByte(0x0000, 0x66);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getH()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_l_hlptr() {
+        reg.setHL(0x8000);
+        mmu.writeByte(0x8000, 0x42);
+        mmu.writeByte(0x0000, 0x6E);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getL()).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_a_hlptr() {
+        reg.setHL(0x8000);
+        mmu.writeByte(0x8000, 0x42);
+        mmu.writeByte(0x0000, 0x7E);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0x42);
+    }
+
+    // LD (HL), r - write register into memory at HL
+    @Test
+    void test_ld_hlptr_b() {
+        reg.setHL(0x8000);
+        reg.setB(0x42);
+        mmu.writeByte(0x0000, 0x70);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_hlptr_c() {
+        reg.setHL(0x8000);
+        reg.setC(0x42);
+        mmu.writeByte(0x0000, 0x71);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_hlptr_d() {
+        reg.setHL(0x8000);
+        reg.setD(0x42);
+        mmu.writeByte(0x0000, 0x72);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_hlptr_e() {
+        reg.setHL(0x8000);
+        reg.setE(0x42);
+        mmu.writeByte(0x0000, 0x73);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
+    }
+
+    @Test
+    void test_ld_hlptr_h() {
+        reg.setHL(0x3000);
+        mmu.writeByte(0x0000, 0x74);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x3000)).isEqualTo(0x30);
+    }
+
+    @Test
+    void test_ld_hlptr_l() {
+        reg.setHL(0x3030);
+        mmu.writeByte(0x0000, 0x75);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x3030)).isEqualTo(0x30);
+    }
+
+    @Test
+    void test_ld_hlptr_a() {
+        reg.setHL(0x8000);
+        reg.setA(0x42);
+        mmu.writeByte(0x0000, 0x77);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0x8000)).isEqualTo(0x42);
+    }
 }

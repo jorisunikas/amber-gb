@@ -68,6 +68,7 @@ public class CPU {
         opcodes[0x43] = this::ld_b_e;
         opcodes[0x44] = this::ld_b_h;
         opcodes[0x45] = this::ld_b_l;
+        opcodes[0x46] = this::ld_b_hlptr;
         opcodes[0x47] = this::ld_b_a;
 
         opcodes[0x48] = this::ld_c_b;
@@ -76,6 +77,7 @@ public class CPU {
         opcodes[0x4B] = this::ld_c_e;
         opcodes[0x4C] = this::ld_c_h;
         opcodes[0x4D] = this::ld_c_l;
+        opcodes[0x4E] = this::ld_c_hlptr;
         opcodes[0x4F] = this::ld_c_a;
 
         opcodes[0x50] = this::ld_d_b;
@@ -84,6 +86,7 @@ public class CPU {
         opcodes[0x53] = this::ld_d_e;
         opcodes[0x54] = this::ld_d_h;
         opcodes[0x55] = this::ld_d_l;
+        opcodes[0x56] = this::ld_d_hlptr;
         opcodes[0x57] = this::ld_d_a;
 
         opcodes[0x58] = this::ld_e_b;
@@ -92,6 +95,7 @@ public class CPU {
         opcodes[0x5B] = this::ld_e_e;
         opcodes[0x5C] = this::ld_e_h;
         opcodes[0x5D] = this::ld_e_l;
+        opcodes[0x5E] = this::ld_e_hlptr;
         opcodes[0x5F] = this::ld_e_a;
 
         opcodes[0x60] = this::ld_h_b;
@@ -100,6 +104,7 @@ public class CPU {
         opcodes[0x63] = this::ld_h_e;
         opcodes[0x64] = this::ld_h_h;
         opcodes[0x65] = this::ld_h_l;
+        opcodes[0x66] = this::ld_h_hlptr;
         opcodes[0x67] = this::ld_h_a;
 
         opcodes[0x68] = this::ld_l_b;
@@ -108,7 +113,17 @@ public class CPU {
         opcodes[0x6B] = this::ld_l_e;
         opcodes[0x6C] = this::ld_l_h;
         opcodes[0x6D] = this::ld_l_l;
+        opcodes[0x6E] = this::ld_l_hlptr;
         opcodes[0x6F] = this::ld_l_a;
+
+        opcodes[0x70] = this::ld_hlptr_b;
+        opcodes[0x71] = this::ld_hlptr_c;
+        opcodes[0x72] = this::ld_hlptr_d;
+        opcodes[0x73] = this::ld_hlptr_e;
+        opcodes[0x74] = this::ld_hlptr_h;
+        opcodes[0x75] = this::ld_hlptr_l;
+        opcodes[0x76] = this::halt;
+        opcodes[0x77] = this::ld_hlptr_a;
 
         opcodes[0x78] = this::ld_a_b;
         opcodes[0x79] = this::ld_a_c;
@@ -116,9 +131,9 @@ public class CPU {
         opcodes[0x7B] = this::ld_a_e;
         opcodes[0x7C] = this::ld_a_h;
         opcodes[0x7D] = this::ld_a_l;
+        opcodes[0x7E] = this::ld_a_hlptr;
         opcodes[0x7F] = this::ld_a_a;
 
-        opcodes[0x76] = this::halt;
         opcodes[0xC0] = this::ret_nz;
         opcodes[0xC2] = this::jp_nz_u16;
         opcodes[0xC8] = this::ret_z;
@@ -153,6 +168,47 @@ public class CPU {
         ime = true;
         cycles = 4;
     }
+
+    private void ld_r_hlptr_helper(IntConsumer setter) {
+        setter.accept(mmu.readByte(reg.getHL()));
+        cycles = 8;
+    }
+
+    private void ld_hlptr_r_helper(IntSupplier getter) {
+        mmu.writeByte(reg.getHL(), getter.getAsInt());
+        cycles = 8;
+    }
+
+    /* ld (HL), r */
+
+    private void ld_hlptr_b(){
+        ld_hlptr_r_helper(reg::getB);
+    }
+
+    private void ld_hlptr_c(){
+        ld_hlptr_r_helper(reg::getC);
+    }
+
+    private void ld_hlptr_d(){
+        ld_hlptr_r_helper(reg::getD);
+    }
+
+    private void ld_hlptr_e(){
+        ld_hlptr_r_helper(reg::getE);
+    }
+
+    private void ld_hlptr_h(){
+        ld_hlptr_r_helper(reg::getH);
+    }
+
+    private void ld_hlptr_l(){
+        ld_hlptr_r_helper(reg::getL);
+    }
+
+    private void ld_hlptr_a(){
+        ld_hlptr_r_helper(reg::getA);
+    }
+
     /* ld A, r */
 
     private void ld_a_b() {
@@ -177,6 +233,10 @@ public class CPU {
 
     private void ld_a_l() {
         ld_r_r_helper(reg::setA, reg::getL);
+    }
+
+    private void ld_a_hlptr() {
+        ld_r_hlptr_helper(reg::setA);
     }
 
     private void ld_a_a() {
@@ -206,6 +266,10 @@ public class CPU {
 
     private void ld_h_l() {
         ld_r_r_helper(reg::setH, reg::getL);
+    }
+
+    private void ld_h_hlptr() {
+        ld_r_hlptr_helper(reg::setH);
     }
 
     private void ld_h_a() {
@@ -238,6 +302,10 @@ public class CPU {
         ld_r_r_helper(reg::setL, reg::getL);
     }
 
+    private void ld_l_hlptr() {
+        ld_r_hlptr_helper(reg::setL);
+    }
+
     private void ld_l_a() {
         ld_r_r_helper(reg::setL, reg::getA);
     }
@@ -268,6 +336,10 @@ public class CPU {
         ld_r_r_helper(reg::setE, reg::getL);
     }
 
+    private void ld_e_hlptr() {
+        ld_r_hlptr_helper(reg::setE);
+    }
+
     private void ld_e_a() {
         ld_r_r_helper(reg::setE, reg::getA);
     }
@@ -295,6 +367,10 @@ public class CPU {
 
     private void ld_d_l() {
         ld_r_r_helper(reg::setD, reg::getL);
+    }
+
+    private void ld_d_hlptr() {
+        ld_r_hlptr_helper(reg::setD);
     }
 
     private void ld_d_a() {
@@ -327,6 +403,10 @@ public class CPU {
         ld_r_r_helper(reg::setC, reg::getL);
     }
 
+    private void ld_c_hlptr() {
+        ld_r_hlptr_helper(reg::setC);
+    }
+
     private void ld_c_a() {
         ld_r_r_helper(reg::setC, reg::getA);
     }
@@ -355,6 +435,10 @@ public class CPU {
 
     private void ld_b_l() {
         ld_r_r_helper(reg::setB, reg::getL);
+    }
+
+    private void ld_b_hlptr() {
+        ld_r_hlptr_helper(reg::setB);
     }
 
     private void ld_b_a() {
