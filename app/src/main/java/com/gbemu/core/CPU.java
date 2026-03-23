@@ -151,7 +151,7 @@ public class CPU {
         opcodes[0xA3] = this::and_e;
         opcodes[0xA4] = this::and_h;
         opcodes[0xA5] = this::and_l;
-        opcodes[0xA6] = null;
+        opcodes[0xA6] = this::and_hlptr;
         opcodes[0xA7] = this::and_a;
         opcodes[0xA8] = this::xor_b;
         opcodes[0xA9] = this::xor_c;
@@ -251,6 +251,13 @@ public class CPU {
     private void and_l() {and_r_helper(reg::getL); }
     private void and_a() {and_r_helper(reg::getA); }
     // @formatter:on
+
+    private void and_hlptr(){
+        reg.setA((mmu.readByte(reg.getHL()) & 0xFF) & reg.getA());
+        reg.setFlagZ(reg.getA() == 0);
+        reg.setFlagH(true);
+        cycles = 8;
+    }
 
     private void and_r_helper(IntSupplier getter) {
         reg.setA(getter.getAsInt() & reg.getA());
