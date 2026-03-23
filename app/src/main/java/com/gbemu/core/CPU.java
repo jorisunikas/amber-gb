@@ -154,6 +154,14 @@ public class CPU {
         opcodes[0xAE] = this::xor_hlptr;
         opcodes[0xAF] = this::xor_a;
 
+        opcodes[0xB0] = this::or_b;
+        opcodes[0xB1] = this::or_c;
+        opcodes[0xB2] = this::or_d;
+        opcodes[0xB3] = this::or_e;
+        opcodes[0xB4] = this::or_h;
+        opcodes[0xB5] = this::or_l;
+        opcodes[0xB7] = this::or_a;
+
         opcodes[0xC0] = this::ret_nz;
         opcodes[0xC1] = this::pop_bc;
         opcodes[0xC2] = this::jp_nz_u16;
@@ -260,7 +268,25 @@ public class CPU {
         cycles = 4;
     }
 
+    private void or_r_helper(IntSupplier getter) {
+        reg.setA(getter.getAsInt() | reg.getA());
+        reg.setF(0x00);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 4;
+    }
+
     /* OPCODES */
+    // @formatter:off
+
+    /* OR */
+
+    private void or_b() { or_r_helper(reg::getB); }
+    private void or_c() { or_r_helper(reg::getC); }
+    private void or_d() { or_r_helper(reg::getD); }
+    private void or_e() { or_r_helper(reg::getE); }
+    private void or_h() { or_r_helper(reg::getH); }
+    private void or_l() { or_r_helper(reg::getL); }
+    private void or_a() { or_r_helper(reg::getA); }
 
     /* XOR */
 
