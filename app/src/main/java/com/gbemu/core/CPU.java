@@ -176,6 +176,7 @@ public class CPU {
         opcodes[0xBB] = this::cp_e;
         opcodes[0xBC] = this::cp_h;
         opcodes[0xBD] = this::cp_l;
+        opcodes[0xBE] = this::cp_hlptr;
         opcodes[0xBF] = this::cp_a;
 
         opcodes[0xC0] = this::ret_nz;
@@ -258,6 +259,15 @@ public class CPU {
     private void cp_h() {cp_r_helper(reg::getH); }
     private void cp_a() {cp_r_helper(reg::getA); }
     // @formatter:on
+
+    private void cp_hlptr(){
+        int value = mmu.readByte(reg.getHL());
+        reg.setFlagZ(value == reg.getA());
+        reg.setFlagN(true);
+        reg.setFlagH((reg.getA() & 0xF) < (value & 0xF));
+        reg.setFlagC(reg.getA() < value);
+        cycles = 8;
+    }
 
     private void cp_r_helper(IntSupplier getter){
         // A - R
