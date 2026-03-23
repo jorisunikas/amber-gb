@@ -160,6 +160,7 @@ public class CPU {
         opcodes[0xB3] = this::or_e;
         opcodes[0xB4] = this::or_h;
         opcodes[0xB5] = this::or_l;
+        opcodes[0xB6] = this::or_hlptr;
         opcodes[0xB7] = this::or_a;
 
         opcodes[0xC0] = this::ret_nz;
@@ -276,10 +277,10 @@ public class CPU {
     }
 
     /* OPCODES */
-    // @formatter:off
 
     /* OR */
 
+    // @formatter:off
     private void or_b() { or_r_helper(reg::getB); }
     private void or_c() { or_r_helper(reg::getC); }
     private void or_d() { or_r_helper(reg::getD); }
@@ -287,6 +288,12 @@ public class CPU {
     private void or_h() { or_r_helper(reg::getH); }
     private void or_l() { or_r_helper(reg::getL); }
     private void or_a() { or_r_helper(reg::getA); }
+    // @formatter:on
+    private void or_hlptr() {
+        reg.setA((mmu.readByte(reg.getHL()) & 0xFF) | reg.getA());
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 8;
+    }
 
     /* XOR */
 
@@ -318,7 +325,7 @@ public class CPU {
         xor_r_helper(reg::getA);
     }
 
-    private void xor_hlptr(){
+    private void xor_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) ^ reg.getA());
         reg.setFlagZ(reg.getA() == 0);
         cycles = 8;
