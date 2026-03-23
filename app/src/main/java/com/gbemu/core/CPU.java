@@ -145,6 +145,14 @@ public class CPU {
         opcodes[0x7E] = this::ld_a_hlptr;
         opcodes[0x7F] = this::ld_a_a;
 
+        opcodes[0xA8] = this::xor_b;
+        opcodes[0xA9] = this::xor_c;
+        opcodes[0xAA] = this::xor_d;
+        opcodes[0xAB] = this::xor_e;
+        opcodes[0xAC] = this::xor_h;
+        opcodes[0xAD] = this::xor_l;
+        opcodes[0xAF] = this::xor_a;
+
         opcodes[0xC0] = this::ret_nz;
         opcodes[0xC1] = this::pop_bc;
         opcodes[0xC2] = this::jp_nz_u16;
@@ -244,7 +252,45 @@ public class CPU {
         cycles = 12;
     }
 
+    private void xor_r_helper(IntSupplier getter) {
+        reg.setA(getter.getAsInt() ^ reg.getA());
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 4;
+    }
+
     /* OPCODES */
+
+    /* XOR */
+
+    private void xor_b() {
+        xor_r_helper(reg::getB);
+    }
+
+    private void xor_c() {
+        xor_r_helper(reg::getC);
+    }
+
+    private void xor_d() {
+        xor_r_helper(reg::getD);
+    }
+
+    private void xor_e() {
+        xor_r_helper(reg::getE);
+    }
+
+    private void xor_h() {
+        xor_r_helper(reg::getH);
+    }
+
+    private void xor_l() {
+        xor_r_helper(reg::getL);
+    }
+
+    private void xor_a() {
+        xor_r_helper(reg::getA);
+    }
+
+    /* PUSH */
 
     private void push_bc() {
         push_rr_helper(reg::getBC);
@@ -261,6 +307,8 @@ public class CPU {
     private void push_af() {
         push_rr_helper(reg::getAF);
     }
+
+    /* POP */
 
     private void pop_bc() {
         pop_rr_helper(reg::setBC);
