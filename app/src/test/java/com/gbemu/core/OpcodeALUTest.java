@@ -134,4 +134,26 @@ public class OpcodeALUTest extends OpcodeTestBase {
         assertThat(reg.getA()).isEqualTo(0);
         assertThat(reg.isFlagZ()).isTrue();
     }
+
+    @Test
+    void test_xor_hlptr(){
+        reg.setA(0xFF);
+        reg.setHL(0x0200);
+        mmu.writeByte(0x0000, 0xAE);
+        mmu.writeByte(0x0200, 0x0F);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0xF0);
+        assertThat(reg.isFlagZ()).isFalse();
+    }
+
+    @Test
+    void test_xor_hlptr_zero(){
+        reg.setA(0xAA);
+        reg.setHL(0x0200);
+        mmu.writeByte(0x0000, 0xAE);
+        mmu.writeByte(0x0200, 0xAA);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0);
+        assertThat(reg.isFlagZ()).isTrue();
+    }
 }

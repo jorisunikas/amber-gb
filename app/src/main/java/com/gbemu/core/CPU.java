@@ -151,6 +151,7 @@ public class CPU {
         opcodes[0xAB] = this::xor_e;
         opcodes[0xAC] = this::xor_h;
         opcodes[0xAD] = this::xor_l;
+        opcodes[0xAE] = this::xor_hlptr;
         opcodes[0xAF] = this::xor_a;
 
         opcodes[0xC0] = this::ret_nz;
@@ -288,6 +289,12 @@ public class CPU {
 
     private void xor_a() {
         xor_r_helper(reg::getA);
+    }
+
+    private void xor_hlptr(){
+        reg.setA((mmu.readByte(reg.getHL()) & 0xFF) ^ reg.getA());
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 8;
     }
 
     /* PUSH */
