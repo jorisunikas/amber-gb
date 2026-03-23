@@ -145,6 +145,14 @@ public class CPU {
         opcodes[0x7E] = this::ld_a_hlptr;
         opcodes[0x7F] = this::ld_a_a;
 
+        opcodes[0xA0] = this::and_b;
+        opcodes[0xA1] = this::and_c;
+        opcodes[0xA2] = this::and_d;
+        opcodes[0xA3] = this::and_e;
+        opcodes[0xA4] = this::and_h;
+        opcodes[0xA5] = this::and_l;
+        opcodes[0xA6] = null;
+        opcodes[0xA7] = this::and_a;
         opcodes[0xA8] = this::xor_b;
         opcodes[0xA9] = this::xor_c;
         opcodes[0xAA] = this::xor_d;
@@ -229,22 +237,28 @@ public class CPU {
         cycles = 12;
     }
 
-    private void xor_r_helper(IntSupplier getter) {
-        reg.setA(getter.getAsInt() ^ reg.getA());
-        reg.setF(0x00);
-        reg.setFlagZ(reg.getA() == 0);
-        cycles = 4;
-    }
-
-    private void or_r_helper(IntSupplier getter) {
-        reg.setA(getter.getAsInt() | reg.getA());
-        reg.setF(0x00);
-        reg.setFlagZ(reg.getA() == 0);
-        cycles = 4;
-    }
 
     /* OPCODES */
 
+    /* AND */
+
+    // @formatter:off
+    private void and_b() {and_r_helper(reg::getB); }
+    private void and_c() {and_r_helper(reg::getC); }
+    private void and_d() {and_r_helper(reg::getD); }
+    private void and_e() {and_r_helper(reg::getE); }
+    private void and_h() {and_r_helper(reg::getH); }
+    private void and_l() {and_r_helper(reg::getL); }
+    private void and_a() {and_r_helper(reg::getA); }
+    // @formatter:on
+
+    private void and_r_helper(IntSupplier getter) {
+        reg.setA(getter.getAsInt() & reg.getA());
+        reg.setF(0x00);
+        reg.setFlagZ(reg.getA() == 0);
+        reg.setFlagH(true);
+        cycles = 4;
+    }
     /* OR */
 
     // @formatter:off
@@ -256,10 +270,18 @@ public class CPU {
     private void or_l() { or_r_helper(reg::getL); }
     private void or_a() { or_r_helper(reg::getA); }
     // @formatter:on
+
     private void or_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) | reg.getA());
         reg.setFlagZ(reg.getA() == 0);
         cycles = 8;
+    }
+
+    private void or_r_helper(IntSupplier getter) {
+        reg.setA(getter.getAsInt() | reg.getA());
+        reg.setF(0x00);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 4;
     }
 
     /* XOR */
@@ -273,10 +295,18 @@ public class CPU {
     private void xor_l() { xor_r_helper(reg::getL); }
     private void xor_a() { xor_r_helper(reg::getA); }
     // @formatter:on
+
     private void xor_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) ^ reg.getA());
         reg.setFlagZ(reg.getA() == 0);
         cycles = 8;
+    }
+
+    private void xor_r_helper(IntSupplier getter) {
+        reg.setA(getter.getAsInt() ^ reg.getA());
+        reg.setF(0x00);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 4;
     }
 
     /* PUSH */
