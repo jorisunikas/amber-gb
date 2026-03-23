@@ -6,14 +6,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class OpcodeALUTest extends OpcodeTestBase {
 
+    /* XOR */
+
     @Test
     void test_xor_b(){
+        reg.setF(0xFF);
         reg.setA(0xFF);
         reg.setB(0x0F);
         mmu.writeByte(0x0000, 0xA8);
         assertThat(cpu.step()).isEqualTo(4);
         assertThat(reg.getA()).isEqualTo(0xF0);
         assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isFalse();
     }
 
     @Test
@@ -156,4 +162,6 @@ public class OpcodeALUTest extends OpcodeTestBase {
         assertThat(reg.getA()).isEqualTo(0);
         assertThat(reg.isFlagZ()).isTrue();
     }
+
+    /* OR */
 }

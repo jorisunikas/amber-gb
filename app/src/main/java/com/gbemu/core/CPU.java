@@ -255,6 +255,7 @@ public class CPU {
 
     private void xor_r_helper(IntSupplier getter) {
         reg.setA(getter.getAsInt() ^ reg.getA());
+        reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);
         cycles = 4;
     }
