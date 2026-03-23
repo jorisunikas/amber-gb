@@ -586,4 +586,101 @@ public class OpcodeALUTest extends OpcodeTestBase {
         assertThat(cpu.step()).isEqualTo(4);
         assertThat(reg.isFlagZ()).isTrue();
     }
+
+    @Test
+    void test_xor_u8(){
+        reg.setA(0xFF);
+        reg.setF(0xFF); // see if all flags are reset
+        mmu.writeByte(0x0000, 0xEE);
+        mmu.writeByte(0x0001, 0x0F);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0xF0);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_xor_u8_zero(){
+        reg.setA(0xFF);
+        mmu.writeByte(0x0000, 0xEE);
+        mmu.writeByte(0x0001, 0xFF);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0x00);
+        assertThat(reg.isFlagZ()).isTrue();
+    }
+
+    @Test
+    void test_or_u8(){
+        reg.setA(0xF0);
+        reg.setF(0xFF); // see if all flags are reset
+        mmu.writeByte(0x0000, 0xF6);
+        mmu.writeByte(0x0001, 0x0F);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0xFF);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_or_u8_zero(){
+        reg.setA(0x00);
+        mmu.writeByte(0x0000, 0xF6);
+        mmu.writeByte(0x0001, 0x00);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0x00);
+        assertThat(reg.isFlagZ()).isTrue();
+    }
+
+    @Test
+    void test_and_u8(){
+        reg.setA(0xFF);
+        reg.setF(0xFF); // see if all flags are reset
+        mmu.writeByte(0x0000, 0xE6);
+        mmu.writeByte(0x0001, 0xF0);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0xF0);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isTrue();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_and_u8_zero(){
+        reg.setA(0x00);
+        mmu.writeByte(0x0000, 0xE6);
+        mmu.writeByte(0x0001, 0x00);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0x00);
+        assertThat(reg.isFlagZ()).isTrue();
+    }
+    
+    @Test
+    void test_cp_u8(){
+        reg.setA(0xFE);
+        reg.setF(0xFF); // see if all flags are reset
+        mmu.writeByte(0x0000, 0xFE);
+        mmu.writeByte(0x0001, 0x0F);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isTrue();
+        assertThat(reg.isFlagH()).isTrue();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_cp_u8_zero(){
+        reg.setA(0xFF);
+        mmu.writeByte(0x0000, 0xFE);
+        mmu.writeByte(0x0001, 0xFF);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.isFlagZ()).isTrue();
+        assertThat(reg.isFlagN()).isTrue();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isFalse();
+    }
 }

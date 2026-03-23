@@ -199,14 +199,18 @@ public class CPU {
         opcodes[0xE0] = this::ldh_u8ptr_a;
         opcodes[0xE1] = this::pop_hl;
         opcodes[0xE5] = this::push_hl;
+        opcodes[0xE6] = this::and_u8;
         opcodes[0xEA] = this::ld_u16ptr_a;
+        opcodes[0xEE] = this::xor_u8;
 
         opcodes[0xF0] = this::ldh_a_u8ptr;
         opcodes[0xF1] = this::pop_af;
         opcodes[0xF3] = this::di;
         opcodes[0xF5] = this::push_af;
+        opcodes[0xF6] = this::or_u8;
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
+        opcodes[0xFE] = this::cp_u8;
     }
 
     /* HELPER FUNCTIONS */
@@ -260,7 +264,7 @@ public class CPU {
     private void cp_a() {cp_r_helper(reg::getA); }
     // @formatter:on
 
-    private void cp_hlptr(){
+    private void cp_hlptr() {
         int value = mmu.readByte(reg.getHL());
         reg.setFlagZ(value == reg.getA());
         reg.setFlagN(true);
@@ -269,7 +273,7 @@ public class CPU {
         cycles = 8;
     }
 
-    private void cp_r_helper(IntSupplier getter){
+    private void cp_r_helper(IntSupplier getter) {
         // A - R
         int value = getter.getAsInt();
         reg.setFlagZ(value == reg.getA());
@@ -277,6 +281,15 @@ public class CPU {
         reg.setFlagH((reg.getA() & 0xF) < (value & 0xF));
         reg.setFlagC(reg.getA() < value);
         cycles = 4;
+    }
+
+    private void cp_u8() {
+        int value = fetch();
+        reg.setFlagZ(value == reg.getA());
+        reg.setFlagN(true);
+        reg.setFlagH((reg.getA() & 0xF) < (value & 0xF));
+        reg.setFlagC(reg.getA() < value);
+        cycles = 8;
     }
 
     /* AND */
@@ -291,7 +304,7 @@ public class CPU {
     private void and_a() {and_r_helper(reg::getA); }
     // @formatter:on
 
-    private void and_hlptr(){
+    private void and_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) & reg.getA());
         reg.setFlagZ(reg.getA() == 0);
         reg.setFlagH(true);
@@ -304,6 +317,14 @@ public class CPU {
         reg.setFlagZ(reg.getA() == 0);
         reg.setFlagH(true);
         cycles = 4;
+    }
+
+    private void and_u8(){
+        reg.setA(fetch() & reg.getA());
+        reg.setF(0x00);
+        reg.setFlagZ(reg.getA() == 0);
+        reg.setFlagH(true);
+        cycles = 8;
     }
     /* OR */
 
@@ -330,6 +351,13 @@ public class CPU {
         cycles = 4;
     }
 
+    private void or_u8(){
+        reg.setA(fetch() | reg.getA());
+        reg.setF(0x00);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 8;
+    }
+
     /* XOR */
 
     // @formatter:off
@@ -353,6 +381,13 @@ public class CPU {
         reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);
         cycles = 4;
+    }
+
+    private void xor_u8(){
+        reg.setA(fetch() ^ reg.getA());
+        reg.setF(0x00);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 8;
     }
 
     /* PUSH */
