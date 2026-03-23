@@ -170,6 +170,13 @@ public class CPU {
         opcodes[0xB5] = this::or_l;
         opcodes[0xB6] = this::or_hlptr;
         opcodes[0xB7] = this::or_a;
+        opcodes[0xB8] = this::cp_b;
+        opcodes[0xB9] = this::cp_c;
+        opcodes[0xBA] = this::cp_d;
+        opcodes[0xBB] = this::cp_e;
+        opcodes[0xBC] = this::cp_h;
+        opcodes[0xBD] = this::cp_l;
+        opcodes[0xBF] = this::cp_a;
 
         opcodes[0xC0] = this::ret_nz;
         opcodes[0xC1] = this::pop_bc;
@@ -239,6 +246,28 @@ public class CPU {
 
 
     /* OPCODES */
+
+    /* CP */
+
+    // @formatter:off
+    private void cp_b() {cp_r_helper(reg::getB); }
+    private void cp_c() {cp_r_helper(reg::getC); }
+    private void cp_d() {cp_r_helper(reg::getD); }
+    private void cp_e() {cp_r_helper(reg::getE); }
+    private void cp_l() {cp_r_helper(reg::getL); }
+    private void cp_h() {cp_r_helper(reg::getH); }
+    private void cp_a() {cp_r_helper(reg::getA); }
+    // @formatter:on
+
+    private void cp_r_helper(IntSupplier getter){
+        // A - R
+        int value = getter.getAsInt();
+        reg.setFlagZ(value == reg.getA());
+        reg.setFlagN(true);
+        reg.setFlagH((reg.getA() & 0xF) < (value & 0xF));
+        reg.setFlagC(reg.getA() < value);
+        cycles = 4;
+    }
 
     /* AND */
 
