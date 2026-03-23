@@ -206,44 +206,11 @@ public class CPU {
         cycles = 8;
     }
 
-    private void ld_hlptr_r_helper(IntSupplier getter) {
-        mmu.writeByte(reg.getHL(), getter.getAsInt());
-        cycles = 8;
-    }
-
-    private void ld_r_r_helper(IntConsumer setter, IntSupplier getter) {
-        setter.accept(getter.getAsInt());
-        cycles = 4;
-    }
-
-    private void jump_flag_s8_helper(boolean flag) {
-        if (flag) {
-            jr_s8();
-            return;
-        }
-        fetch();
-        cycles = 8;
-    }
-
-    private void jump_flag_u16_helper(boolean flag) {
-        if (flag) {
-            jp_u16();
-            return;
-        }
-        fetch();
-        fetch();
-        cycles = 12;
-    }
-
     private void ld_rrptr_r_helper(IntSupplier getRR, IntSupplier getR) {
         mmu.writeByte(getRR.getAsInt(), getR.getAsInt());
         cycles = 8;
     }
 
-    private void ld_rr_u16_helper(IntConsumer setter) {
-        setter.accept(get_u16());
-        cycles = 12;
-    }
 
     private void push_rr_helper(IntSupplier getter) {
         reg.decSP();
@@ -297,34 +264,15 @@ public class CPU {
 
     /* XOR */
 
-    private void xor_b() {
-        xor_r_helper(reg::getB);
-    }
-
-    private void xor_c() {
-        xor_r_helper(reg::getC);
-    }
-
-    private void xor_d() {
-        xor_r_helper(reg::getD);
-    }
-
-    private void xor_e() {
-        xor_r_helper(reg::getE);
-    }
-
-    private void xor_h() {
-        xor_r_helper(reg::getH);
-    }
-
-    private void xor_l() {
-        xor_r_helper(reg::getL);
-    }
-
-    private void xor_a() {
-        xor_r_helper(reg::getA);
-    }
-
+    // @formatter:off
+    private void xor_b() { xor_r_helper(reg::getB); }
+    private void xor_c() { xor_r_helper(reg::getC); }
+    private void xor_d() { xor_r_helper(reg::getD); }
+    private void xor_e() { xor_r_helper(reg::getE); }
+    private void xor_h() { xor_r_helper(reg::getH); }
+    private void xor_l() { xor_r_helper(reg::getL); }
+    private void xor_a() { xor_r_helper(reg::getA); }
+    // @formatter:on
     private void xor_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) ^ reg.getA());
         reg.setFlagZ(reg.getA() == 0);
@@ -333,55 +281,37 @@ public class CPU {
 
     /* PUSH */
 
-    private void push_bc() {
-        push_rr_helper(reg::getBC);
-    }
-
-    private void push_de() {
-        push_rr_helper(reg::getDE);
-    }
-
-    private void push_hl() {
-        push_rr_helper(reg::getHL);
-    }
-
-    private void push_af() {
-        push_rr_helper(reg::getAF);
-    }
+    // @formatter:off
+    private void push_bc() { push_rr_helper(reg::getBC); }
+    private void push_de() { push_rr_helper(reg::getDE); }
+    private void push_hl() { push_rr_helper(reg::getHL); }
+    private void push_af() { push_rr_helper(reg::getAF); }
+    // @formatter:on
 
     /* POP */
 
-    private void pop_bc() {
-        pop_rr_helper(reg::setBC);
+    // @formatter:off
+    private void pop_bc() { pop_rr_helper(reg::setBC); }
+    private void pop_de() { pop_rr_helper(reg::setDE); }
+    private void pop_hl() { pop_rr_helper(reg::setHL); }
+    private void pop_af() { pop_rr_helper(reg::setAF); }
+    // @formatter:on
+
+    /* LD rr */
+
+    // @formatter:off
+    private void ld_bc_u16() { ld_rr_u16_helper(reg::setBC); }
+    private void ld_de_u16() { ld_rr_u16_helper(reg::setDE); }
+    private void ld_hl_u16() { ld_rr_u16_helper(reg::setHL); }
+    private void ld_sp_u16() { ld_rr_u16_helper(reg::setSP); }
+    // @formatter:on
+
+    private void ld_rr_u16_helper(IntConsumer setter) {
+        setter.accept(get_u16());
+        cycles = 12;
     }
 
-    private void pop_de() {
-        pop_rr_helper(reg::setDE);
-    }
-
-    private void pop_hl() {
-        pop_rr_helper(reg::setHL);
-    }
-
-    private void pop_af() {
-        pop_rr_helper(reg::setAF);
-    }
-
-    private void ld_bc_u16() {
-        ld_rr_u16_helper(reg::setBC);
-    }
-
-    private void ld_de_u16() {
-        ld_rr_u16_helper(reg::setDE);
-    }
-
-    private void ld_hl_u16() {
-        ld_rr_u16_helper(reg::setHL);
-    }
-
-    private void ld_sp_u16() {
-        ld_rr_u16_helper(reg::setSP);
-    }
+    /* LDH */
 
     private void ldh_u8ptr_a() {
         mmu.writeByte((fetch() & 0xFF) | 0xFF00, reg.getA());
@@ -393,15 +323,12 @@ public class CPU {
         cycles = 12;
     }
 
-    private void ld_a_hlptr_inc() {
-        ld_a_hlptr();
-        reg.incHL();
-    }
+    /* LD */
 
-    private void ld_a_hlptr_dec() {
-        ld_a_hlptr();
-        reg.decHL();
-    }
+    // @formatter:off
+    private void ld_a_hlptr_inc() { ld_a_hlptr(); reg.incHL(); }
+    private void ld_a_hlptr_dec() { ld_a_hlptr(); reg.decHL(); }
+    // @formatter:on
 
     private void ld_hlptr_a_inc() {
         ld_rrptr_r_helper(reg::getHL, reg::getA);
@@ -413,13 +340,10 @@ public class CPU {
         reg.decHL();
     }
 
-    private void ld_bcptr_a() {
-        ld_rrptr_r_helper(reg::getBC, reg::getA);
-    }
-
-    private void ld_deptr_a() {
-        ld_rrptr_r_helper(reg::getDE, reg::getA);
-    }
+    // @formatter:off
+    private void ld_bcptr_a() { ld_rrptr_r_helper(reg::getBC, reg::getA); }
+    private void ld_deptr_a() { ld_rrptr_r_helper(reg::getDE, reg::getA); }
+    // @formatter:on
 
     private void ld_hlptr_u8() {
         mmu.writeByte(reg.getHL(), fetch());
@@ -427,333 +351,140 @@ public class CPU {
     }
 
     private void ld_u16ptr_a() {
-        int address = get_u16();
-        mmu.writeByte(address, reg.getA());
+        mmu.writeByte(get_u16(), reg.getA());
         cycles = 16;
     }
 
     private void ld_a_u16ptr() {
-        int address = get_u16();
-        reg.setA(mmu.readByte(address));
+        reg.setA(mmu.readByte(get_u16()));
         cycles = 16;
     }
 
-    // TODO implement fully
-    private void halt() {
+    // @formatter:off
+    private void halt() { halted = true; cycles = 4; }
+    private void di() { ime = false; cycles = 4; }
+    private void ei() { ime = true; cycles = 4; }
+    // @formatter:on
+
+    /* LD (HL), r */
+
+    // @formatter:off
+    private void ld_hlptr_b() { ld_hlptr_r_helper(reg::getB); }
+    private void ld_hlptr_c() { ld_hlptr_r_helper(reg::getC); }
+    private void ld_hlptr_d() { ld_hlptr_r_helper(reg::getD); }
+    private void ld_hlptr_e() { ld_hlptr_r_helper(reg::getE); }
+    private void ld_hlptr_h() { ld_hlptr_r_helper(reg::getH); }
+    private void ld_hlptr_l() { ld_hlptr_r_helper(reg::getL); }
+    private void ld_hlptr_a() { ld_hlptr_r_helper(reg::getA); }
+    // @formatter:on
+
+    private void ld_hlptr_r_helper(IntSupplier getter) {
+        mmu.writeByte(reg.getHL(), getter.getAsInt());
+        cycles = 8;
+    }
+
+    /* LD A, r */
+
+    // @formatter:off
+    private void ld_a_b() { ld_r_r_helper(reg::setA, reg::getB); }
+    private void ld_a_c() { ld_r_r_helper(reg::setA, reg::getC); }
+    private void ld_a_d() { ld_r_r_helper(reg::setA, reg::getD); }
+    private void ld_a_e() { ld_r_r_helper(reg::setA, reg::getE); }
+    private void ld_a_h() { ld_r_r_helper(reg::setA, reg::getH); }
+    private void ld_a_l() { ld_r_r_helper(reg::setA, reg::getL); }
+    private void ld_a_a() { ld_r_r_helper(reg::setA, reg::getA); }
+    private void ld_a_hlptr() { ld_r_hlptr_helper(reg::setA); }
+    // @formatter:on
+
+    /* LD H, r */
+
+    // @formatter:off
+    private void ld_h_b() { ld_r_r_helper(reg::setH, reg::getB); }
+    private void ld_h_c() { ld_r_r_helper(reg::setH, reg::getC); }
+    private void ld_h_d() { ld_r_r_helper(reg::setH, reg::getD); }
+    private void ld_h_e() { ld_r_r_helper(reg::setH, reg::getE); }
+    private void ld_h_h() { ld_r_r_helper(reg::setH, reg::getH); }
+    private void ld_h_l() { ld_r_r_helper(reg::setH, reg::getL); }
+    private void ld_h_a() { ld_r_r_helper(reg::setH, reg::getA); }
+    private void ld_h_hlptr() { ld_r_hlptr_helper(reg::setH); }
+
+    /* LD L, r */
+
+    private void ld_l_b() { ld_r_r_helper(reg::setL, reg::getB); }
+    private void ld_l_c() { ld_r_r_helper(reg::setL, reg::getC); }
+    private void ld_l_d() { ld_r_r_helper(reg::setL, reg::getD); }
+    private void ld_l_e() { ld_r_r_helper(reg::setL, reg::getE); }
+    private void ld_l_h() { ld_r_r_helper(reg::setL, reg::getH); }
+    private void ld_l_l() { ld_r_r_helper(reg::setL, reg::getL); }
+    private void ld_l_a() { ld_r_r_helper(reg::setL, reg::getA); }
+    private void ld_l_hlptr() { ld_r_hlptr_helper(reg::setL); }
+
+    /* LD E, r */
+
+    private void ld_e_b() { ld_r_r_helper(reg::setE, reg::getB); }
+    private void ld_e_c() { ld_r_r_helper(reg::setE, reg::getC); }
+    private void ld_e_d() { ld_r_r_helper(reg::setE, reg::getD); }
+    private void ld_e_e() { ld_r_r_helper(reg::setE, reg::getE); }
+    private void ld_e_h() { ld_r_r_helper(reg::setE, reg::getH); }
+    private void ld_e_l() { ld_r_r_helper(reg::setE, reg::getL); }
+    private void ld_e_a() { ld_r_r_helper(reg::setE, reg::getA); }
+    private void ld_e_hlptr() { ld_r_hlptr_helper(reg::setE); }
+
+    /* LD D, r */
+
+    private void ld_d_b() { ld_r_r_helper(reg::setD, reg::getB); }
+    private void ld_d_c() { ld_r_r_helper(reg::setD, reg::getC); }
+    private void ld_d_d() { ld_r_r_helper(reg::setD, reg::getD); }
+    private void ld_d_e() { ld_r_r_helper(reg::setD, reg::getE); }
+    private void ld_d_h() { ld_r_r_helper(reg::setD, reg::getH); }
+    private void ld_d_l() { ld_r_r_helper(reg::setD, reg::getL); }
+    private void ld_d_a() { ld_r_r_helper(reg::setD, reg::getA); }
+    private void ld_d_hlptr() { ld_r_hlptr_helper(reg::setD); }
+
+    /* LD C, r */
+
+    private void ld_c_b() { ld_r_r_helper(reg::setC, reg::getB); }
+    private void ld_c_c() { ld_r_r_helper(reg::setC, reg::getC); }
+    private void ld_c_d() { ld_r_r_helper(reg::setC, reg::getD); }
+    private void ld_c_e() { ld_r_r_helper(reg::setC, reg::getE); }
+    private void ld_c_h() { ld_r_r_helper(reg::setC, reg::getH); }
+    private void ld_c_l() { ld_r_r_helper(reg::setC, reg::getL); }
+    private void ld_c_a() { ld_r_r_helper(reg::setC, reg::getA); }
+    private void ld_c_hlptr() { ld_r_hlptr_helper(reg::setC); }
+
+    /* LD B, r */
+
+    private void ld_b_b() { ld_r_r_helper(reg::setB, reg::getB); }
+    private void ld_b_c() { ld_r_r_helper(reg::setB, reg::getC); }
+    private void ld_b_d() { ld_r_r_helper(reg::setB, reg::getD); }
+    private void ld_b_e() { ld_r_r_helper(reg::setB, reg::getE); }
+    private void ld_b_h() { ld_r_r_helper(reg::setB, reg::getH); }
+    private void ld_b_l() { ld_r_r_helper(reg::setB, reg::getL); }
+    private void ld_b_a() { ld_r_r_helper(reg::setB, reg::getA); }
+    private void ld_b_hlptr() { ld_r_hlptr_helper(reg::setB); }
+
+    private void ld_r_r_helper(IntConsumer setter, IntSupplier getter) {
+        setter.accept(getter.getAsInt());
         cycles = 4;
-        halted = true;
     }
 
-    // TODO implement fully
-    private void di() {
-        ime = false;
-        cycles = 4;
-    }
-
-    // TODO implement fully
-    private void ei() {
-        ime = true;
-        cycles = 4;
-    }
-
-    /* ld (HL), r */
-
-    private void ld_hlptr_b() {
-        ld_hlptr_r_helper(reg::getB);
-    }
-
-    private void ld_hlptr_c() {
-        ld_hlptr_r_helper(reg::getC);
-    }
-
-    private void ld_hlptr_d() {
-        ld_hlptr_r_helper(reg::getD);
-    }
-
-    private void ld_hlptr_e() {
-        ld_hlptr_r_helper(reg::getE);
-    }
-
-    private void ld_hlptr_h() {
-        ld_hlptr_r_helper(reg::getH);
-    }
-
-    private void ld_hlptr_l() {
-        ld_hlptr_r_helper(reg::getL);
-    }
-
-    private void ld_hlptr_a() {
-        ld_hlptr_r_helper(reg::getA);
-    }
-
-    /* ld A, r */
-
-    private void ld_a_b() {
-        ld_r_r_helper(reg::setA, reg::getB);
-    }
-
-    private void ld_a_c() {
-        ld_r_r_helper(reg::setA, reg::getC);
-    }
-
-    private void ld_a_d() {
-        ld_r_r_helper(reg::setA, reg::getD);
-    }
-
-    private void ld_a_e() {
-        ld_r_r_helper(reg::setA, reg::getE);
-    }
-
-    private void ld_a_h() {
-        ld_r_r_helper(reg::setA, reg::getH);
-    }
-
-    private void ld_a_l() {
-        ld_r_r_helper(reg::setA, reg::getL);
-    }
-
-    private void ld_a_hlptr() {
-        ld_r_hlptr_helper(reg::setA);
-    }
-
-    private void ld_a_a() {
-        ld_r_r_helper(reg::setA, reg::getA);
-    }
-    /* ld H, r */
-
-    private void ld_h_b() {
-        ld_r_r_helper(reg::setH, reg::getB);
-    }
-
-    private void ld_h_c() {
-        ld_r_r_helper(reg::setH, reg::getC);
-    }
-
-    private void ld_h_d() {
-        ld_r_r_helper(reg::setH, reg::getD);
-    }
-
-    private void ld_h_e() {
-        ld_r_r_helper(reg::setH, reg::getE);
-    }
-
-    private void ld_h_h() {
-        ld_r_r_helper(reg::setH, reg::getH);
-    }
-
-    private void ld_h_l() {
-        ld_r_r_helper(reg::setH, reg::getL);
-    }
-
-    private void ld_h_hlptr() {
-        ld_r_hlptr_helper(reg::setH);
-    }
-
-    private void ld_h_a() {
-        ld_r_r_helper(reg::setH, reg::getA);
-    }
-
-    /* ld L, r */
-
-    private void ld_l_b() {
-        ld_r_r_helper(reg::setL, reg::getB);
-    }
-
-    private void ld_l_c() {
-        ld_r_r_helper(reg::setL, reg::getC);
-    }
-
-    private void ld_l_d() {
-        ld_r_r_helper(reg::setL, reg::getD);
-    }
-
-    private void ld_l_e() {
-        ld_r_r_helper(reg::setL, reg::getE);
-    }
-
-    private void ld_l_h() {
-        ld_r_r_helper(reg::setL, reg::getH);
-    }
-
-    private void ld_l_l() {
-        ld_r_r_helper(reg::setL, reg::getL);
-    }
-
-    private void ld_l_hlptr() {
-        ld_r_hlptr_helper(reg::setL);
-    }
-
-    private void ld_l_a() {
-        ld_r_r_helper(reg::setL, reg::getA);
-    }
-
-    /* ld E, r */
-
-    private void ld_e_b() {
-        ld_r_r_helper(reg::setE, reg::getB);
-    }
-
-    private void ld_e_c() {
-        ld_r_r_helper(reg::setE, reg::getC);
-    }
-
-    private void ld_e_d() {
-        ld_r_r_helper(reg::setE, reg::getD);
-    }
-
-    private void ld_e_e() {
-        ld_r_r_helper(reg::setE, reg::getE);
-    }
-
-    private void ld_e_h() {
-        ld_r_r_helper(reg::setE, reg::getH);
-    }
-
-    private void ld_e_l() {
-        ld_r_r_helper(reg::setE, reg::getL);
-    }
-
-    private void ld_e_hlptr() {
-        ld_r_hlptr_helper(reg::setE);
-    }
-
-    private void ld_e_a() {
-        ld_r_r_helper(reg::setE, reg::getA);
-    }
-    /* ld D, r */
-
-    private void ld_d_b() {
-        ld_r_r_helper(reg::setD, reg::getB);
-    }
-
-    private void ld_d_c() {
-        ld_r_r_helper(reg::setD, reg::getC);
-    }
-
-    private void ld_d_d() {
-        ld_r_r_helper(reg::setD, reg::getD);
-    }
-
-    private void ld_d_e() {
-        ld_r_r_helper(reg::setD, reg::getE);
-    }
-
-    private void ld_d_h() {
-        ld_r_r_helper(reg::setD, reg::getH);
-    }
-
-    private void ld_d_l() {
-        ld_r_r_helper(reg::setD, reg::getL);
-    }
-
-    private void ld_d_hlptr() {
-        ld_r_hlptr_helper(reg::setD);
-    }
-
-    private void ld_d_a() {
-        ld_r_r_helper(reg::setD, reg::getA);
-    }
-
-    /* ld C, r */
-
-    private void ld_c_b() {
-        ld_r_r_helper(reg::setC, reg::getB);
-    }
-
-    private void ld_c_c() {
-        ld_r_r_helper(reg::setC, reg::getC);
-    }
-
-    private void ld_c_d() {
-        ld_r_r_helper(reg::setC, reg::getD);
-    }
-
-    private void ld_c_e() {
-        ld_r_r_helper(reg::setC, reg::getE);
-    }
-
-    private void ld_c_h() {
-        ld_r_r_helper(reg::setC, reg::getH);
-    }
-
-    private void ld_c_l() {
-        ld_r_r_helper(reg::setC, reg::getL);
-    }
-
-    private void ld_c_hlptr() {
-        ld_r_hlptr_helper(reg::setC);
-    }
-
-    private void ld_c_a() {
-        ld_r_r_helper(reg::setC, reg::getA);
-    }
-
-    /* ld B, r */
-
-    private void ld_b_b() {
-        ld_r_r_helper(reg::setB, reg::getB);
-    }
-
-    private void ld_b_c() {
-        ld_r_r_helper(reg::setB, reg::getC);
-    }
-
-    private void ld_b_d() {
-        ld_r_r_helper(reg::setB, reg::getD);
-    }
-
-    private void ld_b_e() {
-        ld_r_r_helper(reg::setB, reg::getE);
-    }
-
-    private void ld_b_h() {
-        ld_r_r_helper(reg::setB, reg::getH);
-    }
+    /* LD r, u8 */
 
-    private void ld_b_l() {
-        ld_r_r_helper(reg::setB, reg::getL);
-    }
-
-    private void ld_b_hlptr() {
-        ld_r_hlptr_helper(reg::setB);
-    }
-
-    private void ld_b_a() {
-        ld_r_r_helper(reg::setB, reg::getA);
-    }
-
-    private void ld_b_u8() {
-        ld_u8_helper(reg::setB);
-    }
-
-    private void ld_c_u8() {
-        ld_u8_helper(reg::setC);
-    }
-
-    private void ld_d_u8() {
-        ld_u8_helper(reg::setD);
-    }
-
-    private void ld_e_u8() {
-        ld_u8_helper(reg::setE);
-    }
-
-    private void ld_h_u8() {
-        ld_u8_helper(reg::setH);
-    }
-
-    private void ld_l_u8() {
-        ld_u8_helper(reg::setL);
-    }
-
-    private void ld_a_u8() {
-        ld_u8_helper(reg::setA);
-    }
+    private void ld_b_u8() { ld_r_u8_helper(reg::setB); }
+    private void ld_c_u8() { ld_r_u8_helper(reg::setC); }
+    private void ld_d_u8() { ld_r_u8_helper(reg::setD); }
+    private void ld_e_u8() { ld_r_u8_helper(reg::setE); }
+    private void ld_h_u8() { ld_r_u8_helper(reg::setH); }
+    private void ld_l_u8() { ld_r_u8_helper(reg::setL); }
+    private void ld_a_u8() { ld_r_u8_helper(reg::setA); }
+    // @formatter:on
 
-    private void ld_u8_helper(IntConsumer setter) {
+    private void ld_r_u8_helper(IntConsumer setter) {
         setter.accept(fetch());
         cycles = 8;
     }
+
+    /* CALL */
 
     private void call_u16() {
         int address = get_u16();
@@ -768,6 +499,23 @@ public class CPU {
 
     }
 
+    /* RET */
+
+    // @formatter:off
+    private void ret_c() { ret_flag_helper(reg.isFlagC()); }
+    private void ret_z()  { ret_flag_helper(reg.isFlagZ()); }
+    private void ret_nc() { ret_flag_helper(!reg.isFlagC()); }
+    private void ret_nz() { ret_flag_helper(!reg.isFlagZ()); }
+    // @formatter:on 
+
+    private void ret_flag_helper(boolean flag) {
+        if (flag) {
+            ret();
+            return;
+        }
+        cycles = 8;
+    }
+
     private void ret() {
         int low = mmu.readByte(reg.getSP());
         reg.incSP();
@@ -778,33 +526,22 @@ public class CPU {
         cycles = 16;
     }
 
-    private void ret_flag_helper(boolean flag) {
+    /* JR s8 */
+
+    // @formatter:off
+    private void jr_c_s8() { jump_flag_s8_helper(reg.isFlagC()); }
+    private void jr_z_s8() { jump_flag_s8_helper(reg.isFlagZ()); }
+    private void jr_nc_s8() { jump_flag_s8_helper(!reg.isFlagC()); }
+    private void jr_nz_s8() { jump_flag_s8_helper(!reg.isFlagZ()); }
+    // @formatter:on
+
+    private void jump_flag_s8_helper(boolean flag) {
         if (flag) {
-            ret();
+            jr_s8();
             return;
         }
+        fetch();
         cycles = 8;
-    }
-
-    private void ret_nz() {
-        ret_flag_helper(!reg.isFlagZ());
-    }
-
-    private void ret_z() {
-        ret_flag_helper(reg.isFlagZ());
-    }
-
-    private void ret_nc() {
-        ret_flag_helper(!reg.isFlagC());
-    }
-
-    private void ret_c() {
-        ret_flag_helper(reg.isFlagC());
-    }
-
-    private void jp_u16() {
-        reg.setPC(get_u16());
-        cycles = 16;
     }
 
     private void jr_s8() {
@@ -813,35 +550,27 @@ public class CPU {
         cycles = 12;
     }
 
-    private void jr_nz_s8() {
-        jump_flag_s8_helper(!reg.isFlagZ());
+    /* JP u16 */
+
+    // @formatter:off
+    private void jp_c_u16() { jump_flag_u16_helper(reg.isFlagC()); } 
+    private void jp_z_u16() { jump_flag_u16_helper(reg.isFlagZ()); }
+    private void jp_nc_u16() { jump_flag_u16_helper(!reg.isFlagC()); }
+    private void jp_nz_u16() { jump_flag_u16_helper(!reg.isFlagZ()); }
+    // @formatter:on
+
+    private void jump_flag_u16_helper(boolean flag) {
+        if (flag) {
+            jp_u16();
+            return;
+        }
+        fetch();
+        fetch();
+        cycles = 12;
     }
 
-    private void jr_z_s8() {
-        jump_flag_s8_helper(reg.isFlagZ());
-    }
-
-    private void jr_nc_s8() {
-        jump_flag_s8_helper(!reg.isFlagC());
-    }
-
-    private void jr_c_s8() {
-        jump_flag_s8_helper(reg.isFlagC());
-    }
-
-    private void jp_nz_u16() {
-        jump_flag_u16_helper(!reg.isFlagZ());
-    }
-
-    private void jp_z_u16() {
-        jump_flag_u16_helper(reg.isFlagZ());
-    }
-
-    private void jp_nc_u16() {
-        jump_flag_u16_helper(!reg.isFlagC());
-    }
-
-    private void jp_c_u16() {
-        jump_flag_u16_helper(reg.isFlagC());
+    private void jp_u16() {
+        reg.setPC(get_u16());
+        cycles = 16;
     }
 }
