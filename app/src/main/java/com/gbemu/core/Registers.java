@@ -9,15 +9,12 @@ public class Registers {
             flagC; // carry flag
 
     public Registers() {
-        this.a = 0;
-        this.b = 0;
-        this.c = 0;
-        this.d = 0;
-        this.e = 0;
-        this.h = 0;
-        this.l = 0;
-        this.sp = 0;
-        this.pc = 0;
+        setAF(0x01B0);
+        setBC(0x0013);
+        setDE(0x00D8);
+        setHL(0x014D);
+        setSP(0xFFFE);
+        setPC(0x0100);
         this.flagZ = false;
         this.flagN = false;
         this.flagH = false;
