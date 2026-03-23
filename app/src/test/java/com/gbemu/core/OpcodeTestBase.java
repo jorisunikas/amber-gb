@@ -12,5 +12,7 @@ public abstract class OpcodeTestBase {
         mmu = new MMU();
         reg = new Registers();
         cpu = new CPU(mmu, reg);
+        // ignores startup-sequence, refactor later
+        reg.setPC(0x0000);
     }
 }

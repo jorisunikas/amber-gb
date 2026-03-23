@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 public class OpcodeMiscTest extends OpcodeTestBase {
+
     @Test
     void test_nop() {
         mmu.writeByte(0x0000, 0x00);

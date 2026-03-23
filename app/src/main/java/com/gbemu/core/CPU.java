@@ -36,7 +36,7 @@ public class CPU {
         Runnable handler = opcodes[opcode];
         if (handler == null)
             throw new IllegalStateException(
-                    "Unrecognised opcode: 0x" + Integer.toHexString(opcode));
+                    "Unrecognised opcode: 0x" + Integer.toHexString(opcode).toUpperCase());
 
         handler.run();
         return cycles;
@@ -146,23 +146,31 @@ public class CPU {
         opcodes[0x7F] = this::ld_a_a;
 
         opcodes[0xC0] = this::ret_nz;
+        opcodes[0xC1] = this::pop_bc;
         opcodes[0xC2] = this::jp_nz_u16;
         opcodes[0xC3] = this::jp_u16;
+        opcodes[0xC5] = this::push_bc;
         opcodes[0xC8] = this::ret_z;
         opcodes[0xC9] = this::ret;
         opcodes[0xCA] = this::jp_z_u16;
         opcodes[0xCD] = this::call_u16;
 
         opcodes[0xD0] = this::ret_nc;
+        opcodes[0xD1] = this::pop_de;
         opcodes[0xD2] = this::jp_nc_u16;
+        opcodes[0xD5] = this::push_de;
         opcodes[0xD8] = this::ret_c;
         opcodes[0xDA] = this::jp_c_u16;
 
         opcodes[0xE0] = this::ldh_u8ptr_a;
+        opcodes[0xE1] = this::pop_hl;
+        opcodes[0xE5] = this::push_hl;
         opcodes[0xEA] = this::ld_u16ptr_a;
 
         opcodes[0xF0] = this::ldh_a_u8ptr;
+        opcodes[0xF1] = this::pop_af;
         opcodes[0xF3] = this::di;
+        opcodes[0xF5] = this::push_af;
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
     }
@@ -214,26 +222,75 @@ public class CPU {
         cycles = 8;
     }
 
-    private void ld_rr_u16_helper(IntConsumer setter){
+    private void ld_rr_u16_helper(IntConsumer setter) {
         setter.accept(get_u16());
+        cycles = 12;
+    }
+
+    private void push_rr_helper(IntSupplier getter) {
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), getter.getAsInt() >> 8);
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), getter.getAsInt() & 0xFF);
+        cycles = 16;
+    }
+
+    private void pop_rr_helper(IntConsumer setter) {
+        int value = mmu.readByte(reg.getSP());
+        reg.incSP();
+        value += (mmu.readByte(reg.getSP()) << 8);
+        reg.incSP();
+        setter.accept(value);
         cycles = 12;
     }
 
     /* OPCODES */
 
-    private void ld_bc_u16(){
+    private void push_bc() {
+        push_rr_helper(reg::getBC);
+    }
+
+    private void push_de() {
+        push_rr_helper(reg::getDE);
+    }
+
+    private void push_hl() {
+        push_rr_helper(reg::getHL);
+    }
+
+    private void push_af() {
+        push_rr_helper(reg::getAF);
+    }
+
+    private void pop_bc() {
+        pop_rr_helper(reg::setBC);
+    }
+
+    private void pop_de() {
+        pop_rr_helper(reg::setDE);
+    }
+
+    private void pop_hl() {
+        pop_rr_helper(reg::setHL);
+    }
+
+    private void pop_af() {
+        pop_rr_helper(reg::setAF);
+    }
+
+    private void ld_bc_u16() {
         ld_rr_u16_helper(reg::setBC);
     }
 
-    private void ld_de_u16(){
+    private void ld_de_u16() {
         ld_rr_u16_helper(reg::setDE);
     }
 
-    private void ld_hl_u16(){
+    private void ld_hl_u16() {
         ld_rr_u16_helper(reg::setHL);
     }
 
-    private void ld_sp_u16(){
+    private void ld_sp_u16() {
         ld_rr_u16_helper(reg::setSP);
     }
 
