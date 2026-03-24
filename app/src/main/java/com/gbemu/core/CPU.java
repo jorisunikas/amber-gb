@@ -151,6 +151,7 @@ public class CPU {
         opcodes[0x83] = this::add_e;
         opcodes[0x84] = this::add_h;
         opcodes[0x85] = this::add_l;
+        opcodes[0x86] = this::add_hlptr;
         opcodes[0x87] = this::add_a;
 
         opcodes[0xA0] = this::and_b;
@@ -192,6 +193,7 @@ public class CPU {
         opcodes[0xC2] = this::jp_nz_u16;
         opcodes[0xC3] = this::jp_u16;
         opcodes[0xC5] = this::push_bc;
+        opcodes[0xC6] = this::add_u8;
         opcodes[0xC8] = this::ret_z;
         opcodes[0xC9] = this::ret;
         opcodes[0xCA] = this::jp_z_u16;
@@ -283,16 +285,36 @@ public class CPU {
         cycles = 4;
     }
 
+    private void add_hlptr(){
+        int value = mmu.readByte(reg.getHL());
+        reg.setFlagN(false);
+        reg.setFlagH(((reg.getA() & 0xF) + (value & 0xF)) > 0xF);
+        reg.setFlagC((reg.getA() + value) > 0xFF);
+        reg.setA(reg.getA() + value);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 8;
+    }
+
+    private void add_u8(){
+        int value = fetch(); 
+        reg.setFlagN(false);
+        reg.setFlagH(((reg.getA() & 0xF) + (value & 0xF)) > 0xF);
+        reg.setFlagC((reg.getA() + value) > 0xFF);
+        reg.setA(reg.getA() + value);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 8;
+    }
+
     /* CP */
 
     // @formatter:off
-    private void cp_b() {cp_r_helper(reg::getB); }
-    private void cp_c() {cp_r_helper(reg::getC); }
-    private void cp_d() {cp_r_helper(reg::getD); }
-    private void cp_e() {cp_r_helper(reg::getE); }
-    private void cp_l() {cp_r_helper(reg::getL); }
-    private void cp_h() {cp_r_helper(reg::getH); }
-    private void cp_a() {cp_r_helper(reg::getA); }
+    private void cp_b() { cp_r_helper(reg::getB); }
+    private void cp_c() { cp_r_helper(reg::getC); }
+    private void cp_d() { cp_r_helper(reg::getD); }
+    private void cp_e() { cp_r_helper(reg::getE); }
+    private void cp_l() { cp_r_helper(reg::getL); }
+    private void cp_h() { cp_r_helper(reg::getH); }
+    private void cp_a() { cp_r_helper(reg::getA); }
     // @formatter:on
 
     private void cp_hlptr() {
