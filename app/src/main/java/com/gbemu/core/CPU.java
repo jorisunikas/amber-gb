@@ -145,6 +145,14 @@ public class CPU {
         opcodes[0x7E] = this::ld_a_hlptr;
         opcodes[0x7F] = this::ld_a_a;
 
+        opcodes[0x80] = this::add_b;
+        opcodes[0x81] = this::add_c;
+        opcodes[0x82] = this::add_d;
+        opcodes[0x83] = this::add_e;
+        opcodes[0x84] = this::add_h;
+        opcodes[0x85] = this::add_l;
+        opcodes[0x87] = this::add_a;
+
         opcodes[0xA0] = this::and_b;
         opcodes[0xA1] = this::and_c;
         opcodes[0xA2] = this::and_d;
@@ -252,6 +260,29 @@ public class CPU {
 
     /* OPCODES */
 
+    /* ADD */
+
+    // @formatter:off
+    private void add_b() { add_r_helper(reg::getB); }
+    private void add_c() { add_r_helper(reg::getC); }
+    private void add_d() { add_r_helper(reg::getD); }
+    private void add_e() { add_r_helper(reg::getE); }
+    private void add_h() { add_r_helper(reg::getH); }
+    private void add_l() { add_r_helper(reg::getL); }
+    private void add_a() { add_r_helper(reg::getA); }
+    // @formatter:on
+
+
+    private void add_r_helper(IntSupplier getter) {
+        int value = getter.getAsInt();
+        reg.setFlagN(false);
+        reg.setFlagH(((reg.getA() & 0xF) + (value & 0xF)) > 0xF);
+        reg.setFlagC((reg.getA() + value) > 0xFF);
+        reg.setA(reg.getA() + value);
+        reg.setFlagZ(reg.getA() == 0);
+        cycles = 4;
+    }
+
     /* CP */
 
     // @formatter:off
@@ -319,7 +350,7 @@ public class CPU {
         cycles = 4;
     }
 
-    private void and_u8(){
+    private void and_u8() {
         reg.setA(fetch() & reg.getA());
         reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);
@@ -351,7 +382,7 @@ public class CPU {
         cycles = 4;
     }
 
-    private void or_u8(){
+    private void or_u8() {
         reg.setA(fetch() | reg.getA());
         reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);
@@ -383,7 +414,7 @@ public class CPU {
         cycles = 4;
     }
 
-    private void xor_u8(){
+    private void xor_u8() {
         reg.setA(fetch() ^ reg.getA());
         reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);

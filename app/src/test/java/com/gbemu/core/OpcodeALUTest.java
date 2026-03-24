@@ -683,4 +683,96 @@ public class OpcodeALUTest extends OpcodeTestBase {
         assertThat(reg.isFlagH()).isFalse();
         assertThat(reg.isFlagC()).isFalse();
     }
+
+    @Test
+    void test_add_b(){
+        reg.setA(0x01);
+        reg.setB(0x01);
+        mmu.writeByte(0x0000, 0x80);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x02);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_add_b_of(){
+        reg.setA(0xFA);
+        reg.setB(0x0A);
+        mmu.writeByte(0x0000, 0x80);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x04);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isTrue();
+        assertThat(reg.isFlagC()).isTrue();
+    }
+
+    @Test
+    void test_add_b_zero(){
+        reg.setA(0x00);
+        reg.setB(0x00);
+        mmu.writeByte(0x0000, 0x80);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x00);
+        assertThat(reg.isFlagZ()).isTrue();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_add_c(){
+        reg.setA(0x01);
+        reg.setC(0x01);
+        mmu.writeByte(0x0000, 0x81);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x02);
+    }
+
+    @Test
+    void test_add_d(){
+        reg.setA(0x01);
+        reg.setD(0x01);
+        mmu.writeByte(0x0000, 0x82);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x02);
+    }
+
+    @Test
+    void test_add_e(){
+        reg.setA(0x01);
+        reg.setE(0x01);
+        mmu.writeByte(0x0000, 0x83);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x02);
+    }
+
+    @Test
+    void test_add_h(){
+        reg.setA(0x01);
+        reg.setH(0x01);
+        mmu.writeByte(0x0000, 0x84);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x02);
+    }
+
+    @Test
+    void test_add_l(){
+        reg.setA(0x01);
+        reg.setL(0x01);
+        mmu.writeByte(0x0000, 0x85);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x02);
+    }
+
+    @Test
+    void test_add_a(){
+        reg.setA(0x01);
+        mmu.writeByte(0x0000, 0x87);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x02);
+    }
 }
