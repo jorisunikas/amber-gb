@@ -1071,4 +1071,147 @@ public class OpcodeALUTest extends OpcodeTestBase {
         assertThat(reg.isFlagH()).isFalse();
         assertThat(reg.isFlagC()).isFalse();
     }
+
+    @Test
+    void test_inc_b(){
+        reg.setFlagC(true);
+        reg.setB(0x01);
+        mmu.writeByte(0x0000, 0x04);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(2);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isTrue();
+    }
+
+    @Test
+    void test_inc_b_zero(){
+        reg.setFlagC(false);
+        reg.setB(0xFF);
+        mmu.writeByte(0x0000, 0x04);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0);
+        assertThat(reg.isFlagZ()).isTrue();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isTrue();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_inc_b_h_flag(){
+        reg.setB(0x0F);
+        mmu.writeByte(0x0000, 0x04);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getB()).isEqualTo(0x10);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isTrue();
+    }
+
+    @Test
+    void test_inc_c(){
+        reg.setC(0x01);
+        mmu.writeByte(0x0000, 0x0C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getC()).isEqualTo(2);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    @Test
+    void test_inc_d(){
+        reg.setD(0x01);
+        mmu.writeByte(0x0000, 0x14);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getD()).isEqualTo(2);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    @Test
+    void test_inc_e(){
+        reg.setE(0x01);
+        mmu.writeByte(0x0000, 0x1C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getE()).isEqualTo(2);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    @Test
+    void test_inc_h(){
+        reg.setH(0x01);
+        mmu.writeByte(0x0000, 0x24);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getH()).isEqualTo(2);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    @Test
+    void test_inc_l(){
+        reg.setL(0x01);
+        mmu.writeByte(0x0000, 0x2C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getL()).isEqualTo(2);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    @Test
+    void test_inc_a(){
+        reg.setA(0x01);
+        mmu.writeByte(0x0000, 0x3C);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(2);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    @Test
+    void test_inc_hlptr(){
+        reg.setFlagC(true);
+        reg.setHL(0x0100);
+        mmu.writeByte(0x0000, 0x34);
+        mmu.writeByte(0x0100, 0x01);
+        assertThat(cpu.step()).isEqualTo(12);
+        assertThat(mmu.readByte(0x0100)).isEqualTo(0x02);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isTrue();
+    }
+
+    @Test
+    void test_inc_hlptr_zero(){
+        reg.setFlagC(false);
+        reg.setHL(0x0100);
+        mmu.writeByte(0x0000, 0x34);
+        mmu.writeByte(0x0100, 0xFF);
+        assertThat(cpu.step()).isEqualTo(12);
+        assertThat(mmu.readByte(0x0100)).isEqualTo(0x00);
+        assertThat(reg.isFlagZ()).isTrue();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isTrue();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_inc_hlptr_h_flag(){
+        reg.setHL(0x0100);
+        mmu.writeByte(0x0000, 0x34);
+        mmu.writeByte(0x0100, 0x0F);
+        assertThat(cpu.step()).isEqualTo(12);
+        assertThat(mmu.readByte(0x0100)).isEqualTo(0x10);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isTrue();
+    }
 }

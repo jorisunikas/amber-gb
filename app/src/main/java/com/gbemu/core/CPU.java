@@ -4,6 +4,8 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.zip.Adler32;
 
+import javax.naming.InsufficientResourcesException;
+
 public class CPU {
     private final Registers reg;
     private final MMU mmu;
@@ -52,29 +54,37 @@ public class CPU {
         opcodes[0x00] = () -> cycles = 4;
         opcodes[0x01] = this::ld_bc_u16;
         opcodes[0x02] = this::ld_bcptr_a;
+        opcodes[0x04] = this::inc_b;
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x0E] = this::ld_c_u8;
+        opcodes[0x0C] = this::inc_c;
 
         opcodes[0x11] = this::ld_de_u16;
         opcodes[0x12] = this::ld_deptr_a;
+        opcodes[0x14] = this::inc_d;
         opcodes[0x16] = this::ld_d_u8;
         opcodes[0x18] = this::jr_s8;
+        opcodes[0x1C] = this::inc_e;
         opcodes[0x1E] = this::ld_e_u8;
 
         opcodes[0x21] = this::ld_hl_u16;
         opcodes[0x20] = this::jr_nz_s8;
         opcodes[0x22] = this::ld_hlptr_a_inc;
+        opcodes[0x24] = this::inc_h;
         opcodes[0x26] = this::ld_h_u8;
         opcodes[0x28] = this::jr_z_s8;
         opcodes[0x2A] = this::ld_a_hlptr_inc;
+        opcodes[0x2C] = this::inc_l;
         opcodes[0x2E] = this::ld_l_u8;
 
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x31] = this::ld_sp_u16;
         opcodes[0x32] = this::ld_hlptr_a_dec;
+        opcodes[0x34] = this::inc_hlptr;
         opcodes[0x36] = this::ld_hlptr_u8;
         opcodes[0x38] = this::jr_c_s8;
         opcodes[0x3A] = this::ld_a_hlptr_dec;
+        opcodes[0x3C] = this::inc_a;
         opcodes[0x3E] = this::ld_a_u8;
 
         opcodes[0x40] = this::ld_b_b;
@@ -251,7 +261,6 @@ public class CPU {
         cycles = 8;
     }
 
-
     private void push_rr_helper(IntSupplier getter) {
         reg.decSP();
         mmu.writeByte(reg.getSP(), getter.getAsInt() >> 8);
@@ -269,8 +278,37 @@ public class CPU {
         cycles = 12;
     }
 
-
     /* OPCODES */
+
+    /* INC */
+
+    // @formatter:off
+    private void inc_b() { inc_r_helper(reg::incB, reg::getB); }
+    private void inc_c() { inc_r_helper(reg::incC, reg::getC); }
+    private void inc_d() { inc_r_helper(reg::incD, reg::getD); }
+    private void inc_e() { inc_r_helper(reg::incE, reg::getE); }
+    private void inc_h() { inc_r_helper(reg::incH, reg::getH); }
+    private void inc_l() { inc_r_helper(reg::incL, reg::getL); }
+    private void inc_a() { inc_r_helper(reg::incA, reg::getA); }
+    // @formatter:on
+
+    private void inc_r_helper(Runnable incReg, IntSupplier getter) {
+        int value = getter.getAsInt();
+        reg.setFlagH((value & 0xF) == 0xF);
+        reg.setFlagN(false);
+        incReg.run();
+        reg.setFlagZ(getter.getAsInt() == 0);
+        cycles = 4;
+    }
+
+    private void inc_hlptr(){
+        int value = mmu.readByte(reg.getHL());
+        reg.setFlagH((value & 0xF) == 0xF);
+        reg.setFlagN(false);
+        mmu.writeByte(reg.getHL(), value+1);
+        reg.setFlagZ(mmu.readByte(reg.getHL())== 0);
+        cycles = 12;
+    }
 
     /* SUB */
 
@@ -294,7 +332,7 @@ public class CPU {
         cycles = 4;
     }
 
-    private void sub_hlptr(){
+    private void sub_hlptr() {
         int value = mmu.readByte(reg.getHL());
         reg.setFlagN(true);
         reg.setFlagC(reg.getA() < value);
@@ -304,7 +342,7 @@ public class CPU {
         cycles = 8;
     }
 
-    private void sub_u8(){
+    private void sub_u8() {
         int value = fetch();
         reg.setFlagN(true);
         reg.setFlagC(reg.getA() < value);
@@ -324,7 +362,6 @@ public class CPU {
     private void add_l() { add_r_helper(reg::getL); }
     private void add_a() { add_r_helper(reg::getA); }
     // @formatter:on
-
 
     private void add_r_helper(IntSupplier getter) {
         int value = getter.getAsInt();
