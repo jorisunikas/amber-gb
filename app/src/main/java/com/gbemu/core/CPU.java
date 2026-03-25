@@ -55,36 +55,44 @@ public class CPU {
         opcodes[0x01] = this::ld_bc_u16;
         opcodes[0x02] = this::ld_bcptr_a;
         opcodes[0x04] = this::inc_b;
+        opcodes[0x05] = this::dec_b;
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x0E] = this::ld_c_u8;
         opcodes[0x0C] = this::inc_c;
+        opcodes[0x0D] = this::dec_c;
 
         opcodes[0x11] = this::ld_de_u16;
         opcodes[0x12] = this::ld_deptr_a;
         opcodes[0x14] = this::inc_d;
+        opcodes[0x15] = this::dec_d;
         opcodes[0x16] = this::ld_d_u8;
         opcodes[0x18] = this::jr_s8;
         opcodes[0x1C] = this::inc_e;
+        opcodes[0x1D] = this::dec_e;
         opcodes[0x1E] = this::ld_e_u8;
 
         opcodes[0x21] = this::ld_hl_u16;
         opcodes[0x20] = this::jr_nz_s8;
         opcodes[0x22] = this::ld_hlptr_a_inc;
         opcodes[0x24] = this::inc_h;
+        opcodes[0x25] = this::dec_h;
         opcodes[0x26] = this::ld_h_u8;
         opcodes[0x28] = this::jr_z_s8;
         opcodes[0x2A] = this::ld_a_hlptr_inc;
         opcodes[0x2C] = this::inc_l;
+        opcodes[0x2D] = this::dec_l;
         opcodes[0x2E] = this::ld_l_u8;
 
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x31] = this::ld_sp_u16;
         opcodes[0x32] = this::ld_hlptr_a_dec;
         opcodes[0x34] = this::inc_hlptr;
+        opcodes[0x35] = this::dec_hlptr;
         opcodes[0x36] = this::ld_hlptr_u8;
         opcodes[0x38] = this::jr_c_s8;
         opcodes[0x3A] = this::ld_a_hlptr_dec;
         opcodes[0x3C] = this::inc_a;
+        opcodes[0x3D] = this::dec_a;
         opcodes[0x3E] = this::ld_a_u8;
 
         opcodes[0x40] = this::ld_b_b;
@@ -280,6 +288,36 @@ public class CPU {
 
     /* OPCODES */
 
+    /* DEC */
+
+    // @formatter:off
+    private void dec_b() { dec_r_helper(reg::decB, reg::getB); }
+    private void dec_c() { dec_r_helper(reg::decC, reg::getC); }
+    private void dec_d() { dec_r_helper(reg::decD, reg::getD); }
+    private void dec_e() { dec_r_helper(reg::decE, reg::getE); }
+    private void dec_h() { dec_r_helper(reg::decH, reg::getH); }
+    private void dec_l() { dec_r_helper(reg::decL, reg::getL); }
+    private void dec_a() { dec_r_helper(reg::decA, reg::getA); }
+    // @formatter:on
+
+
+    private void dec_r_helper(Runnable decReg, IntSupplier getter){
+        int value = getter.getAsInt();
+        reg.setFlagH((value & 0xF) == 0x0);
+        reg.setFlagN(true);
+        decReg.run();
+        reg.setFlagZ(getter.getAsInt() == 0);
+        cycles = 4;
+    }
+
+    private void dec_hlptr(){
+        int value = mmu.readByte(reg.getHL());
+        reg.setFlagH((value & 0xF) == 0x0);
+        reg.setFlagN(true);
+        mmu.writeByte(reg.getHL(), value-1);
+        reg.setFlagZ(mmu.readByte(reg.getHL())== 0);
+        cycles = 12;
+    }
     /* INC */
 
     // @formatter:off
