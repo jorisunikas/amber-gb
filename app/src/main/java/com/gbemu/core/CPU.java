@@ -59,6 +59,7 @@ public class CPU {
         opcodes[0x05] = this::dec_b;
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x0E] = this::ld_c_u8;
+        opcodes[0x0B] = this::dec_bc;
         opcodes[0x0C] = this::inc_c;
         opcodes[0x0D] = this::dec_c;
 
@@ -69,6 +70,7 @@ public class CPU {
         opcodes[0x15] = this::dec_d;
         opcodes[0x16] = this::ld_d_u8;
         opcodes[0x18] = this::jr_s8;
+        opcodes[0x1B] = this::dec_de;
         opcodes[0x1C] = this::inc_e;
         opcodes[0x1D] = this::dec_e;
         opcodes[0x1E] = this::ld_e_u8;
@@ -82,6 +84,7 @@ public class CPU {
         opcodes[0x26] = this::ld_h_u8;
         opcodes[0x28] = this::jr_z_s8;
         opcodes[0x2A] = this::ld_a_hlptr_inc;
+        opcodes[0x2B] = this::dec_hl;
         opcodes[0x2C] = this::inc_l;
         opcodes[0x2D] = this::dec_l;
         opcodes[0x2E] = this::ld_l_u8;
@@ -95,6 +98,7 @@ public class CPU {
         opcodes[0x36] = this::ld_hlptr_u8;
         opcodes[0x38] = this::jr_c_s8;
         opcodes[0x3A] = this::ld_a_hlptr_dec;
+        opcodes[0x3B] = this::dec_sp;
         opcodes[0x3C] = this::inc_a;
         opcodes[0x3D] = this::dec_a;
         opcodes[0x3E] = this::ld_a_u8;
@@ -293,6 +297,14 @@ public class CPU {
     /* OPCODES */
 
     /* DEC */
+
+
+    // @formatter:off
+    private void dec_bc() { reg.decBC(); cycles = 8; }
+    private void dec_de() { reg.decDE(); cycles = 8; }
+    private void dec_hl() { reg.decHL(); cycles = 8; }
+    private void dec_sp() { reg.decSP(); cycles = 8; }
+    // @formatter:on
 
     // @formatter:off
     private void dec_b() { dec_r_helper(reg::decB, reg::getB); }

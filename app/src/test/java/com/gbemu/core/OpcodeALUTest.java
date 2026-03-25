@@ -1397,4 +1397,62 @@ public class OpcodeALUTest extends OpcodeTestBase {
         assertThat(cpu.step()).isEqualTo(8);
         assertThat(reg.getSP()).isEqualTo(0x0102);
     }
+
+    @Test
+    void test_dec_bc() {
+        reg.setF(0xFF);
+        reg.setBC(0x0002);
+        mmu.writeByte(0x0000, 0x0B);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getBC()).isEqualTo(0x0001);
+        assertThat(reg.getB()).isEqualTo(0x00);
+        assertThat(reg.getC()).isEqualTo(0x01);
+        assertThat(reg.isFlagZ()).isTrue();
+        assertThat(reg.isFlagN()).isTrue();
+        assertThat(reg.isFlagH()).isTrue();
+        assertThat(reg.isFlagC()).isTrue();
+    }
+
+    @Test
+    void test_dec_bc_wrap() {
+        reg.setF(0x00);
+        reg.setBC(0x0000);
+        mmu.writeByte(0x0000, 0x0B);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getBC()).isEqualTo(0xFFFF);
+        assertThat(reg.getB()).isEqualTo(0xFF);
+        assertThat(reg.getC()).isEqualTo(0xFF);
+        assertThat(reg.isFlagZ()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+        assertThat(reg.isFlagC()).isFalse();
+    }
+
+    @Test
+    void test_dec_de(){
+        reg.setDE(0x0101);
+        mmu.writeByte(0x0000, 0x1B);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getDE()).isEqualTo(0x0100);
+        assertThat(reg.getD()).isEqualTo(0x01);
+        assertThat(reg.getE()).isEqualTo(0x00);
+    }
+
+    @Test
+    void test_dec_hl(){
+        reg.setHL(0x0101);
+        mmu.writeByte(0x0000, 0x2B);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getHL()).isEqualTo(0x0100);
+        assertThat(reg.getH()).isEqualTo(0x01);
+        assertThat(reg.getL()).isEqualTo(0x00);
+    }
+
+    @Test
+    void test_dec_sp(){
+        reg.setSP(0x0101);
+        mmu.writeByte(0x0000, 0x3B);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getSP()).isEqualTo(0x0100);
+    }
 }
