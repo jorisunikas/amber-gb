@@ -54,6 +54,7 @@ public class CPU {
         opcodes[0x00] = () -> cycles = 4;
         opcodes[0x01] = this::ld_bc_u16;
         opcodes[0x02] = this::ld_bcptr_a;
+        opcodes[0x03] = this::inc_bc;
         opcodes[0x04] = this::inc_b;
         opcodes[0x05] = this::dec_b;
         opcodes[0x06] = this::ld_b_u8;
@@ -63,6 +64,7 @@ public class CPU {
 
         opcodes[0x11] = this::ld_de_u16;
         opcodes[0x12] = this::ld_deptr_a;
+        opcodes[0x13] = this::inc_de;
         opcodes[0x14] = this::inc_d;
         opcodes[0x15] = this::dec_d;
         opcodes[0x16] = this::ld_d_u8;
@@ -74,6 +76,7 @@ public class CPU {
         opcodes[0x21] = this::ld_hl_u16;
         opcodes[0x20] = this::jr_nz_s8;
         opcodes[0x22] = this::ld_hlptr_a_inc;
+        opcodes[0x23] = this::inc_hl;
         opcodes[0x24] = this::inc_h;
         opcodes[0x25] = this::dec_h;
         opcodes[0x26] = this::ld_h_u8;
@@ -85,6 +88,7 @@ public class CPU {
 
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x31] = this::ld_sp_u16;
+        opcodes[0x33] = this::inc_sp;
         opcodes[0x32] = this::ld_hlptr_a_dec;
         opcodes[0x34] = this::inc_hlptr;
         opcodes[0x35] = this::dec_hlptr;
@@ -300,8 +304,7 @@ public class CPU {
     private void dec_a() { dec_r_helper(reg::decA, reg::getA); }
     // @formatter:on
 
-
-    private void dec_r_helper(Runnable decReg, IntSupplier getter){
+    private void dec_r_helper(Runnable decReg, IntSupplier getter) {
         int value = getter.getAsInt();
         reg.setFlagH((value & 0xF) == 0x0);
         reg.setFlagN(true);
@@ -310,15 +313,23 @@ public class CPU {
         cycles = 4;
     }
 
-    private void dec_hlptr(){
+    private void dec_hlptr() {
         int value = mmu.readByte(reg.getHL());
         reg.setFlagH((value & 0xF) == 0x0);
         reg.setFlagN(true);
-        mmu.writeByte(reg.getHL(), value-1);
-        reg.setFlagZ(mmu.readByte(reg.getHL())== 0);
+        mmu.writeByte(reg.getHL(), value - 1);
+        reg.setFlagZ(mmu.readByte(reg.getHL()) == 0);
         cycles = 12;
     }
+
     /* INC */
+
+    // @formatter:off
+    private void inc_bc() { reg.incBC(); cycles = 8; }
+    private void inc_de() { reg.incDE(); cycles = 8; }
+    private void inc_hl() { reg.incHL(); cycles = 8; }
+    private void inc_sp() { reg.incSP(); cycles = 8; }
+    // @formatter:on
 
     // @formatter:off
     private void inc_b() { inc_r_helper(reg::incB, reg::getB); }
@@ -339,12 +350,12 @@ public class CPU {
         cycles = 4;
     }
 
-    private void inc_hlptr(){
+    private void inc_hlptr() {
         int value = mmu.readByte(reg.getHL());
         reg.setFlagH((value & 0xF) == 0xF);
         reg.setFlagN(false);
-        mmu.writeByte(reg.getHL(), value+1);
-        reg.setFlagZ(mmu.readByte(reg.getHL())== 0);
+        mmu.writeByte(reg.getHL(), value + 1);
+        reg.setFlagZ(mmu.readByte(reg.getHL()) == 0);
         cycles = 12;
     }
 
