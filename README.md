@@ -46,7 +46,7 @@ The output `amber-gb.jar` will be located in app/build/libs directory.
 ## Features
 
 - CPU: 154 of 512 opcodes implemented, each covered by unit tests.
-- MMU: 64KB memory map, ROM loading from disk.
+- MMU: 64KB memory map, ROM loading from disk, Serial port callback for Blargg's test output.
 - Display: early-stage Swing window.
 ## Resources
 
