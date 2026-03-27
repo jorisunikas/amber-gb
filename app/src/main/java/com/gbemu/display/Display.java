@@ -17,7 +17,7 @@ public class Display extends JPanel {
     public Display() {
         this.screen = new BufferedImage(GB_WIDTH * SCALE, GB_HEIGHT * SCALE, BufferedImage.TYPE_INT_RGB);
         setPreferredSize(new Dimension(GB_WIDTH * SCALE, GB_HEIGHT * SCALE));
-        setBackground(Color.BLACK);
+        setBackground(Color.ORANGE);
     }
 
     @Override

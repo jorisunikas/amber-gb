@@ -2,9 +2,6 @@ package com.gbemu.core;
 
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-import java.util.zip.Adler32;
-
-import javax.naming.InsufficientResourcesException;
 
 public class CPU {
     private final Registers reg;
