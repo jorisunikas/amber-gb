@@ -1,5 +1,7 @@
 package com.gbemu.core;
 
+import java.lang.invoke.SwitchPoint;
+import java.util.BitSet;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -17,7 +19,6 @@ public class CPU {
 
     public CPU(MMU mmu, Registers reg) {
         this.mmu = mmu;
-
         this.reg = reg;
         opcodes = new Runnable[256];
 
@@ -229,6 +230,7 @@ public class CPU {
         opcodes[0xC8] = this::ret_z;
         opcodes[0xC9] = this::ret;
         opcodes[0xCA] = this::jp_z_u16;
+        opcodes[0xCB] = this::handle_cb;
         opcodes[0xCD] = this::call_u16;
 
         opcodes[0xD0] = this::ret_nc;
@@ -293,8 +295,65 @@ public class CPU {
 
     /* OPCODES */
 
-    /* DEC */
+    /* CB */
 
+    private void handle_cb() {
+        int opcode = fetch();
+        res_helper(opcode);
+        /*
+        switch (opcode & 0xF0) {
+            case 0x8, 0x9, 0xA, 0xB -> res_helper(opcode);
+        }
+        */
+    }
+
+    private void res_helper(int opcode) {
+        IntConsumer setter = get_cb_r_setter(opcode);
+        IntSupplier getter = get_cb_r_getter(opcode);
+        int bits = (opcode >> 3) & 0x7;
+
+        // standart case
+        if(setter != null){ 
+            setter.accept(getter.getAsInt() & ~(1 << bits));
+            cycles = 8;
+            return;
+        }
+
+        // hlptr
+        int value = mmu.readByte(reg.getHL());
+        mmu.writeByte(reg.getHL(), value & ~(1 << bits));
+        cycles = 16;
+    }
+
+    private IntConsumer get_cb_r_setter(int opcode) {
+        int value = opcode & 0x7;
+        return switch (value) {
+            case 0 -> reg::setB;
+            case 1 -> reg::setC;
+            case 2 -> reg::setD;
+            case 3 -> reg::setE;
+            case 4 -> reg::setH;
+            case 5 -> reg::setL;
+            case 7 -> reg::setA;
+            default -> null;
+        };
+    }
+
+    private IntSupplier get_cb_r_getter(int opcode) {
+        int value = opcode & 0x7;
+        return switch (value) {
+            case 0 -> reg::getB;
+            case 1 -> reg::getC;
+            case 2 -> reg::getD;
+            case 3 -> reg::getE;
+            case 4 -> reg::getH;
+            case 5 -> reg::getL;
+            case 7 -> reg::getA;
+            default -> null;
+        };
+    }
+
+    /* DEC */
 
     // @formatter:off
     private void dec_bc() { reg.decBC(); cycles = 8; }
