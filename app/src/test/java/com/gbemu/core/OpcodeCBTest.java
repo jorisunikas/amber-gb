@@ -133,7 +133,7 @@ public class OpcodeCBTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_bit_logic(){
+    void test_bit_logic() {
         int[] opcodes = { 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78 };
 
         for (int i = 0; i < opcodes.length; i++) {
@@ -151,7 +151,7 @@ public class OpcodeCBTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_bit_logic_zero(){
+    void test_bit_logic_zero() {
         int[] opcodes = { 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78 };
 
         for (int i = 0; i < opcodes.length; i++) {
@@ -169,7 +169,7 @@ public class OpcodeCBTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_bit_all(){
+    void test_bit_all() {
         int[] opcodes = { 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47 };
         IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
 
@@ -208,10 +208,10 @@ public class OpcodeCBTest extends OpcodeTestBase {
 
     @Test
     void test_rlc_logic() {
-        int[] input = {0x00, 0x7F};
-        int[] expected = {0x00, 0xFE};
-        boolean[] zeroFlag = {true, false};
-        boolean[] carryFlag = {false, false};
+        int[] input = { 0x00, 0x7F };
+        int[] expected = { 0x00, 0xFE };
+        boolean[] expectedZeroFlag = { true, false };
+        boolean[] expectedCarryFlag = { false, false };
 
         for (int i = 0; i < input.length; i++) {
             reg.setPC(0x0000);
@@ -220,16 +220,16 @@ public class OpcodeCBTest extends OpcodeTestBase {
             mmu.writeByte(0x0001, 0x00);
             assertThat(cpu.step()).isEqualTo(8);
             assertThat(reg.getB()).isEqualTo(expected[i]);
-            assertThat(reg.isFlagZ()).isEqualTo(zeroFlag[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
             assertThat(reg.isFlagN()).isFalse();
             assertThat(reg.isFlagH()).isFalse();
-            assertThat(reg.isFlagC()).isEqualTo(carryFlag[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
         }
     }
 
     @Test
-    void test_rlc_all(){
-        int[] opcodes = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x07};
+    void test_rlc_all() {
+        int[] opcodes = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x07 };
         IntSupplier[] getters = { reg::getB, reg::getC, reg::getD, reg::getE, reg::getH, reg::getL, reg::getA };
         IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
 
@@ -248,11 +248,11 @@ public class OpcodeCBTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_rlc_hlptr(){
-        int[] input = {0x00, 0x7F};
-        int[] expected = {0x00, 0xFE};
-        boolean[] zeroFlag = {true, false};
-        boolean[] carryFlag = {false, false};
+    void test_rlc_hlptr() {
+        int[] input = { 0x00, 0x7F };
+        int[] expected = { 0x00, 0xFE };
+        boolean[] expectedZeroFlag = { true, false };
+        boolean[] expectedCarryFlag = { false, false };
 
         for (int i = 0; i < input.length; i++) {
             reg.setPC(0x0000);
@@ -262,19 +262,19 @@ public class OpcodeCBTest extends OpcodeTestBase {
             mmu.writeByte(0x0001, 0x06);
             assertThat(cpu.step()).isEqualTo(16);
             assertThat(mmu.readByte(0x0100)).isEqualTo(expected[i]);
-            assertThat(reg.isFlagZ()).isEqualTo(zeroFlag[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
             assertThat(reg.isFlagN()).isFalse();
             assertThat(reg.isFlagH()).isFalse();
-            assertThat(reg.isFlagC()).isEqualTo(carryFlag[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
         }
     }
 
     @Test
     void test_rrc_logic() {
-        int[] input = {0x00, 0xFE, 0xFF};
-        int[] expected = {0x00, 0x7F, 0xFF};
-        boolean[] zeroFlag = {true, false, false};
-        boolean[] carryFlag = {false, false, true};
+        int[] input = { 0x00, 0xFE, 0xFF };
+        int[] expected = { 0x00, 0x7F, 0xFF };
+        boolean[] expectedZeroFlag = { true, false, false };
+        boolean[] expectedCarryFlag = { false, false, true };
 
         for (int i = 0; i < input.length; i++) {
             reg.setPC(0x0000);
@@ -283,16 +283,16 @@ public class OpcodeCBTest extends OpcodeTestBase {
             mmu.writeByte(0x0001, 0x08);
             assertThat(cpu.step()).isEqualTo(8);
             assertThat(reg.getB()).isEqualTo(expected[i]);
-            assertThat(reg.isFlagZ()).isEqualTo(zeroFlag[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
             assertThat(reg.isFlagN()).isFalse();
             assertThat(reg.isFlagH()).isFalse();
-            assertThat(reg.isFlagC()).isEqualTo(carryFlag[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
         }
     }
 
     @Test
-    void test_rrc_all(){
-        int[] opcodes = {0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0F};
+    void test_rrc_all() {
+        int[] opcodes = { 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0F };
         IntSupplier[] getters = { reg::getB, reg::getC, reg::getD, reg::getE, reg::getH, reg::getL, reg::getA };
         IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
 
@@ -311,11 +311,11 @@ public class OpcodeCBTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_rrc_hlptr(){
-        int[] input = {0x00, 0xFE, 0xFF};
-        int[] expected = {0x00, 0x7F, 0xFF};
-        boolean[] zeroFlag = {true, false, false};
-        boolean[] carryFlag = {false, false, true};
+    void test_rrc_hlptr() {
+        int[] input = { 0x00, 0xFE, 0xFF };
+        int[] expected = { 0x00, 0x7F, 0xFF };
+        boolean[] expectedZeroFlag = { true, false, false };
+        boolean[] expectedCarryFlag = { false, false, true };
 
         for (int i = 0; i < input.length; i++) {
             reg.setPC(0x0000);
@@ -325,10 +325,78 @@ public class OpcodeCBTest extends OpcodeTestBase {
             mmu.writeByte(0x0001, 0x0E);
             assertThat(cpu.step()).isEqualTo(16);
             assertThat(mmu.readByte(0x0100)).isEqualTo(expected[i]);
-            assertThat(reg.isFlagZ()).isEqualTo(zeroFlag[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
             assertThat(reg.isFlagN()).isFalse();
             assertThat(reg.isFlagH()).isFalse();
-            assertThat(reg.isFlagC()).isEqualTo(carryFlag[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
+        }
+    }
+
+    @Test
+    void test_rl_logic() {
+        int[] input = { 0x00, 0x7F, 0x7F };
+        int[] expected = { 0x00, 0xFE, 0xFF };
+        boolean[] inputCarryFlag = { false, false, true };
+        boolean[] expectedZeroFlag = { true, false, false };
+        boolean[] expectedCarryFlag = { false, false, false };
+
+        for (int i = 0; i < input.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(inputCarryFlag[i]);
+            reg.setB(input[i]);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, 0x10);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getB()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
+        }
+    }
+
+    @Test
+    void test_rl_all() {
+        int[] opcodes = { 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x17 };
+        IntSupplier[] getters = { reg::getB, reg::getC, reg::getD, reg::getE, reg::getH, reg::getL, reg::getA };
+        IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(false);
+            setters[i].accept(0x7F);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(getters[i].getAsInt()).isEqualTo(0xFE);
+            assertThat(reg.isFlagZ()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isFalse();
+        }
+    }
+
+    @Test
+    void test_rl_hlptr() {
+        int[] input = { 0x00, 0x7F, 0x7F };
+        int[] expected = { 0x00, 0xFE, 0xFF };
+        boolean[] inputCarryFlag = { false, false, true };
+        boolean[] expectedZeroFlag = { true, false, false };
+        boolean[] expectedCarryFlag = { false, false, false };
+
+        for (int i = 0; i < input.length; i++) {
+            reg.setPC(0x0000);
+            reg.setHL(0x0100);
+            reg.setFlagC(inputCarryFlag[i]);
+            mmu.writeByte(0x0100, input[i]);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, 0x16);
+            assertThat(cpu.step()).isEqualTo(16);
+            assertThat(mmu.readByte(0x0100)).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
         }
     }
 }
