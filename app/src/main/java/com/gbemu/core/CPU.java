@@ -302,7 +302,27 @@ public class CPU {
         switch ((opcode & 0xF0) >> 4) {
             case 0x8, 0x9, 0xA, 0xB -> res_helper(opcode);
             case 0xC, 0xD, 0xE, 0xF -> set_helper(opcode);
+            case 0x4, 0x5, 0x6, 0x7 -> bit_helper(opcode);
         }
+    }
+
+    private void bit_helper(int opcode){
+        IntSupplier getter = get_cb_r_getter(opcode);
+        int bits = (opcode >> 3) & 0x7;
+        reg.setFlagH(true);
+        reg.setFlagN(false);
+
+        // standart case
+        if(getter != null){ 
+            reg.setFlagZ((getter.getAsInt() & (1 << bits)) == 0);
+            cycles = 8;
+            return;
+        }
+
+        // hlptr
+        int value = mmu.readByte(reg.getHL());
+        reg.setFlagZ((value & (1 << bits)) == 0);
+        cycles = 12;
     }
 
     private void res_helper(int opcode) {

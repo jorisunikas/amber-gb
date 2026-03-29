@@ -131,4 +131,78 @@ public class OpcodeCBTest extends OpcodeTestBase {
             assertThat(reg.isFlagC()).isTrue();
         }
     }
+
+    @Test
+    void test_bit_logic(){
+        int[] opcodes = { 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78 };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(true);
+            reg.setB(0xFF);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.isFlagZ()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isTrue();
+        }
+    }
+
+    @Test
+    void test_bit_logic_zero(){
+        int[] opcodes = { 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78 };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(false);
+            reg.setB(0x00);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.isFlagZ()).isTrue();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isFalse();
+        }
+    }
+
+    @Test
+    void test_bit_all(){
+        int[] opcodes = { 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47 };
+        IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            setters[i].accept(0x00);
+            reg.setF(0xFF);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.isFlagZ()).isTrue();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isTrue();
+        }
+    }
+
+    @Test
+    void test_bit_hlptr() {
+        int[] opcodes = { 0x46, 0x4E, 0x56, 0x5E, 0x66, 0x6E, 0x76, 0x7E };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            reg.setF(0xFF);
+            reg.setHL(0x0100);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            mmu.writeByte(0x0100, 0x00);
+            assertThat(cpu.step()).isEqualTo(12);
+            assertThat(reg.isFlagZ()).isTrue();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isTrue();
+        }
+    }
 }
