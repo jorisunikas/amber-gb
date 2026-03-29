@@ -300,65 +300,53 @@ public class CPU {
     private void handle_cb() {
         int opcode = fetch();
         switch ((opcode & 0xF0) >> 4) {
+            case 0x0 -> rlc_helper(opcode);
+            case 0x4, 0x5, 0x6, 0x7 -> bit_helper(opcode);
             case 0x8, 0x9, 0xA, 0xB -> res_helper(opcode);
             case 0xC, 0xD, 0xE, 0xF -> set_helper(opcode);
-            case 0x4, 0x5, 0x6, 0x7 -> bit_helper(opcode);
         }
     }
 
-    private void bit_helper(int opcode){
+    private void rlc_helper(int opcode) {
+        reg.setFlagH(false);
+        reg.setFlagN(false);
+
+        IntSupplier getter = get_cb_r_getter(opcode);
+        IntConsumer setter = get_cb_r_setter(opcode);
+
+        int value = getter.getAsInt();
+        int bit7 = (value & 0x80) >> 7;
+        value = ((value << 1) | bit7) & 0xFF;
+
+        setter.accept(value);
+        reg.setFlagZ(value == 0);
+        reg.setFlagC(bit7 == 1);
+        cycles = (opcode & 0x7) == 0x6 ? 16 : 8;
+    }
+
+    private void bit_helper(int opcode) {
         IntSupplier getter = get_cb_r_getter(opcode);
         int bits = (opcode >> 3) & 0x7;
         reg.setFlagH(true);
         reg.setFlagN(false);
-
-        // standart case
-        if(getter != null){ 
-            reg.setFlagZ((getter.getAsInt() & (1 << bits)) == 0);
-            cycles = 8;
-            return;
-        }
-
-        // hlptr
-        int value = mmu.readByte(reg.getHL());
-        reg.setFlagZ((value & (1 << bits)) == 0);
-        cycles = 12;
+        reg.setFlagZ((getter.getAsInt() & (1 << bits)) == 0);
+        cycles = (opcode & 0x7) == 0x6 ? 12 : 8;
     }
 
     private void res_helper(int opcode) {
         IntConsumer setter = get_cb_r_setter(opcode);
         IntSupplier getter = get_cb_r_getter(opcode);
         int bits = (opcode >> 3) & 0x7;
-
-        // standart case
-        if(setter != null){ 
-            setter.accept(getter.getAsInt() & ~(1 << bits));
-            cycles = 8;
-            return;
-        }
-
-        // hlptr
-        int value = mmu.readByte(reg.getHL());
-        mmu.writeByte(reg.getHL(), value & ~(1 << bits));
-        cycles = 16;
+        setter.accept(getter.getAsInt() & ~(1 << bits));
+        cycles = (opcode & 0x7) == 0x6 ? 16 : 8;
     }
 
-    private void set_helper(int opcode){
+    private void set_helper(int opcode) {
         IntConsumer setter = get_cb_r_setter(opcode);
         IntSupplier getter = get_cb_r_getter(opcode);
         int bits = (opcode >> 3) & 0x7;
-
-        // standart case
-        if(setter != null){ 
-            setter.accept(getter.getAsInt() | (1 << bits));
-            cycles = 8;
-            return;
-        }
-
-        // hlptr
-        int value = mmu.readByte(reg.getHL());
-        mmu.writeByte(reg.getHL(), value | (1 << bits));
-        cycles = 16;
+        setter.accept(getter.getAsInt() | (1 << bits));
+        cycles = (opcode & 0x7) == 0x6 ? 16 : 8;
     }
 
     private IntConsumer get_cb_r_setter(int opcode) {
@@ -370,8 +358,9 @@ public class CPU {
             case 3 -> reg::setE;
             case 4 -> reg::setH;
             case 5 -> reg::setL;
+            case 6 -> (v) -> mmu.writeByte(reg.getHL(), v);
             case 7 -> reg::setA;
-            default -> null;
+            default -> throw new IllegalStateException();
         };
     }
 
@@ -384,8 +373,9 @@ public class CPU {
             case 3 -> reg::getE;
             case 4 -> reg::getH;
             case 5 -> reg::getL;
+            case 6 -> () -> mmu.readByte(reg.getHL());
             case 7 -> reg::getA;
-            default -> null;
+            default -> throw new IllegalStateException();
         };
     }
 
