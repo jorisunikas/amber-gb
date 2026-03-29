@@ -13,3 +13,7 @@ app/src/test/resources/*
 *.gb
 *.gbc
 *.rom
+
+.settings/
+.project
+.classpath
