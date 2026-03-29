@@ -299,12 +299,37 @@ public class CPU {
 
     private void handle_cb() {
         int opcode = fetch();
-        switch ((opcode & 0xF0) >> 4) {
-            case 0x0 -> rlc_helper(opcode);
-            case 0x4, 0x5, 0x6, 0x7 -> bit_helper(opcode);
-            case 0x8, 0x9, 0xA, 0xB -> res_helper(opcode);
-            case 0xC, 0xD, 0xE, 0xF -> set_helper(opcode);
+        int operation = (opcode >> 3) & 0x7;
+        int group = (opcode >> 6) & 0x3;
+        switch (group) {
+            case 0x0 -> {
+                switch (operation) {
+                    case 0 -> rlc_helper(opcode);
+                    case 1 -> rrc_helper(opcode);
+                    default -> throw new IllegalStateException();
+                }
+            }
+            case 0x1 -> bit_helper(opcode);
+            case 0x2 -> res_helper(opcode);
+            case 0x3 -> set_helper(opcode);
         }
+    }
+
+    private void rrc_helper(int opcode) {
+        reg.setFlagH(false);
+        reg.setFlagN(false);
+
+        IntSupplier getter = get_cb_r_getter(opcode);
+        IntConsumer setter = get_cb_r_setter(opcode);
+
+        int value = getter.getAsInt();
+        int bit0 = value & 0x01;
+        value = ((value >> 1) | bit0 << 7) & 0xFF;
+
+        setter.accept(value);
+        reg.setFlagZ(value == 0);
+        reg.setFlagC(bit0 == 1);
+        cycles = (opcode & 0x7) == 0x6 ? 16 : 8;
     }
 
     private void rlc_helper(int opcode) {
