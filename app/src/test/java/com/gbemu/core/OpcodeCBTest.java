@@ -208,10 +208,10 @@ public class OpcodeCBTest extends OpcodeTestBase {
 
     @Test
     void test_rlc_logic() {
-        int[] input = { 0x00, 0x7F, 0x85};
-        int[] expected = { 0x00, 0xFE, 0x0B};
-        boolean[] expectedZeroFlag = { true, false, false};
-        boolean[] expectedCarryFlag = { false, false, true};
+        int[] input = { 0x00, 0x7F, 0x85 };
+        int[] expected = { 0x00, 0xFE, 0x0B };
+        boolean[] expectedZeroFlag = { true, false, false };
+        boolean[] expectedCarryFlag = { false, false, true };
 
         for (int i = 0; i < input.length; i++) {
             reg.setPC(0x0000);
@@ -249,10 +249,10 @@ public class OpcodeCBTest extends OpcodeTestBase {
 
     @Test
     void test_rlc_hlptr() {
-        int[] input = { 0x00, 0x7F, 0x85};
-        int[] expected = { 0x00, 0xFE, 0x0B};
-        boolean[] expectedZeroFlag = { true, false, false};
-        boolean[] expectedCarryFlag = { false, false, true};
+        int[] input = { 0x00, 0x7F, 0x85 };
+        int[] expected = { 0x00, 0xFE, 0x0B };
+        boolean[] expectedZeroFlag = { true, false, false };
+        boolean[] expectedCarryFlag = { false, false, true };
 
         for (int i = 0; i < input.length; i++) {
             reg.setPC(0x0000);
@@ -470,7 +470,7 @@ public class OpcodeCBTest extends OpcodeTestBase {
 
     @Test
     void test_sla_logic() {
-        int[] input = { 0x00, 0x7F, 0x8F};
+        int[] input = { 0x00, 0x7F, 0x8F };
         int[] expected = { 0x00, 0xFE, 0x1E };
         boolean[] expectedZeroFlag = { true, false, false };
         boolean[] expectedCarryFlag = { false, false, true };
@@ -511,7 +511,7 @@ public class OpcodeCBTest extends OpcodeTestBase {
 
     @Test
     void test_sla_hlptr() {
-        int[] input = { 0x00, 0x7F, 0x8F};
+        int[] input = { 0x00, 0x7F, 0x8F };
         int[] expected = { 0x00, 0xFE, 0x1E };
         boolean[] expectedZeroFlag = { true, false, false };
         boolean[] expectedCarryFlag = { false, false, true };
@@ -592,6 +592,69 @@ public class OpcodeCBTest extends OpcodeTestBase {
             assertThat(reg.isFlagN()).isFalse();
             assertThat(reg.isFlagH()).isFalse();
             assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
+        }
+    }
+
+    @Test
+    void test_swap_logic() {
+        int[] input = { 0x00, 0xFE, 0x7F };
+        int[] expected = { 0x00, 0xEF, 0xF7 };
+        boolean[] expectedZeroFlag = { true, false, false };
+
+        for (int i = 0; i < input.length; i++) {
+            reg.setPC(0x0000);
+            reg.setB(input[i]);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, 0x30);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getB()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isFalse();
+        }
+    }
+
+    @Test
+    void test_swap_all() {
+        int[] opcodes = { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x37 };
+        IntSupplier[] getters = { reg::getB, reg::getC, reg::getD, reg::getE, reg::getH, reg::getL, reg::getA };
+        IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            setters[i].accept(0x7F);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(getters[i].getAsInt()).isEqualTo(0xF7);
+            assertThat(reg.isFlagZ()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isFalse();
+        }
+    }
+
+    @Test
+    void test_swap_hlptr() {
+        int[] input = { 0x00, 0xFE, 0x7F };
+        int[] expected = { 0x00, 0xEF, 0xF7 };
+        boolean[] expectedZeroFlag = { true, false, false };
+
+        for (int i = 0; i < input.length; i++) {
+            reg.setPC(0x0000);
+            reg.setHL(0x0100);
+            mmu.writeByte(0x0100, input[i]);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, 0x36);
+            assertThat(cpu.step()).isEqualTo(16);
+            assertThat(mmu.readByte(0x0100)).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedZeroFlag[i]);
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isFalse();
         }
     }
 }
