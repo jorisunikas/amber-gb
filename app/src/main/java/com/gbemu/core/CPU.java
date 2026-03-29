@@ -297,6 +297,7 @@ public class CPU {
 
     /* CB */
 
+    /** CB opcode format: | group (2 bits) | operation (3 bits) | reg (3 bits) | */
     private void handle_cb() {
         int opcode = fetch();
         int operation = (opcode >> 3) & 0x7;
@@ -308,6 +309,7 @@ public class CPU {
                     case 1 -> rrc_helper(opcode);
                     case 2 -> rl_helper(opcode);
                     case 3 -> rr_helper(opcode);
+                    case 4 -> sla_helper(opcode);
                     default -> throw new IllegalStateException();
                 }
             }
@@ -315,6 +317,24 @@ public class CPU {
             case 0x2 -> res_helper(opcode);
             case 0x3 -> set_helper(opcode);
         }
+    }
+
+    private void sla_helper(int opcode) {
+        reg.setFlagH(false);
+        reg.setFlagN(false);
+
+        IntSupplier getter = get_cb_r_getter(opcode);
+        IntConsumer setter = get_cb_r_setter(opcode);
+
+        int value = getter.getAsInt();
+        int bit7 = (value & 0x80) >> 7;
+        value = (value << 1) & 0xFF;
+
+        setter.accept(value);
+        reg.setFlagZ(value == 0);
+        reg.setFlagC(bit7 == 1);
+        cycles = (opcode & 0x7) == 0x6 ? 16 : 8;
+
     }
 
     private void rr_helper(int opcode) {
