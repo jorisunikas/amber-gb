@@ -69,4 +69,66 @@ public class OpcodeCBTest extends OpcodeTestBase {
             assertThat(reg.isFlagC()).isTrue();
         }
     }
+
+    @Test
+    void test_set_logic() {
+        int[] opcodes = { 0xC0, 0xC8, 0xD0, 0xD8, 0xE0, 0xE8, 0xF0, 0xF8 };
+        int[] expected = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            reg.setF(0xFF);
+            reg.setB(0x00);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getB()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isTrue();
+            assertThat(reg.isFlagN()).isTrue();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isTrue();
+        }
+    }
+
+    @Test
+    void test_set_all() {
+        int[] opcodes = { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC7 };
+        IntSupplier[] getters = { reg::getB, reg::getC, reg::getD, reg::getE, reg::getH, reg::getL, reg::getA };
+        IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            setters[i].accept(0x00);
+            reg.setF(0xFF);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(getters[i].getAsInt()).isEqualTo(0x01);
+            assertThat(reg.isFlagZ()).isTrue();
+            assertThat(reg.isFlagN()).isTrue();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isTrue();
+        }
+    }
+
+    @Test
+    void test_set_hlptr() {
+        int[] opcodes = { 0xC6, 0xCE, 0xD6, 0xDE, 0xE6, 0xEE, 0xF6, 0xFE };
+        int[] expected = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            reg.setF(0xFF);
+            reg.setHL(0x0100);
+            mmu.writeByte(0x0000, 0xCB);
+            mmu.writeByte(0x0001, opcodes[i]);
+            mmu.writeByte(0x0100, 0x00);
+            assertThat(cpu.step()).isEqualTo(16);
+            assertThat(mmu.readByte(0x0100)).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isTrue();
+            assertThat(reg.isFlagN()).isTrue();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isTrue();
+        }
+    }
 }

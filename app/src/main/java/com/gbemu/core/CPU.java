@@ -299,12 +299,10 @@ public class CPU {
 
     private void handle_cb() {
         int opcode = fetch();
-        res_helper(opcode);
-        /*
-        switch (opcode & 0xF0) {
+        switch ((opcode & 0xF0) >> 4) {
             case 0x8, 0x9, 0xA, 0xB -> res_helper(opcode);
+            case 0xC, 0xD, 0xE, 0xF -> set_helper(opcode);
         }
-        */
     }
 
     private void res_helper(int opcode) {
@@ -322,6 +320,24 @@ public class CPU {
         // hlptr
         int value = mmu.readByte(reg.getHL());
         mmu.writeByte(reg.getHL(), value & ~(1 << bits));
+        cycles = 16;
+    }
+
+    private void set_helper(int opcode){
+        IntConsumer setter = get_cb_r_setter(opcode);
+        IntSupplier getter = get_cb_r_getter(opcode);
+        int bits = (opcode >> 3) & 0x7;
+
+        // standart case
+        if(setter != null){ 
+            setter.accept(getter.getAsInt() | (1 << bits));
+            cycles = 8;
+            return;
+        }
+
+        // hlptr
+        int value = mmu.readByte(reg.getHL());
+        mmu.writeByte(reg.getHL(), value | (1 << bits));
         cycles = 16;
     }
 
