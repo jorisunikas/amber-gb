@@ -310,6 +310,7 @@ public class CPU {
                     case 2 -> rl_helper(opcode);
                     case 3 -> rr_helper(opcode);
                     case 4 -> sla_helper(opcode);
+                    case 5 -> sra_helper(opcode);
                     default -> throw new IllegalStateException();
                 }
             }
@@ -317,6 +318,24 @@ public class CPU {
             case 0x2 -> res_helper(opcode);
             case 0x3 -> set_helper(opcode);
         }
+    }
+
+    private void sra_helper(int opcode) {
+        reg.setFlagH(false);
+        reg.setFlagN(false);
+
+        IntSupplier getter = get_cb_r_getter(opcode);
+        IntConsumer setter = get_cb_r_setter(opcode);
+
+        int value = getter.getAsInt();
+        int bit0 = value & 0x01;
+        int bit7 = (value >> 7) & 0x1;
+        value = ((value >> 1) | (bit7 << 7)) & 0xFF;
+
+        setter.accept(value);
+        reg.setFlagZ(value == 0);
+        reg.setFlagC(bit0 == 1);
+        cycles = (opcode & 0x7) == 0x6 ? 16 : 8;
     }
 
     private void sla_helper(int opcode) {
