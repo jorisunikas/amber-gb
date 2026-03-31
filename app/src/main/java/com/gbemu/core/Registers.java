@@ -15,10 +15,6 @@ public class Registers {
         setHL(0x014D);
         setSP(0xFFFE);
         setPC(0x0100);
-        this.flagZ = false;
-        this.flagN = false;
-        this.flagH = false;
-        this.flagC = false;
     }
 
     public int getA() {
