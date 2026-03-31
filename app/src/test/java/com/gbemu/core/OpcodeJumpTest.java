@@ -114,7 +114,7 @@ public class OpcodeJumpTest extends OpcodeTestBase {
 
     @Test
     void test_ret_c_fallsThrough() {
-        reg.setFlagZ(false);
+        reg.setFlagC(false);
         reg.setSP(0xFFFC);
         mmu.writeByte(0xFFFC, 0x50);
         mmu.writeByte(0xFFFD, 0x01);
