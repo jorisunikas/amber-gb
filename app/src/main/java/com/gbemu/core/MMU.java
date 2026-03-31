@@ -7,9 +7,11 @@ import java.util.function.Consumer;
 public class MMU {
     private final int[] memory;
     private Consumer<Integer> serialCallback;
+    private StringBuilder serialOutput;
 
     public MMU() {
         memory = new int[0x10000];
+        serialOutput = new StringBuilder();
         serialCallback = null;
     }
 
@@ -26,16 +28,16 @@ public class MMU {
         memory[adress] = value;
     }
 
-    public void loadROM(String path) {
+    public void loadROM(Path path) {
         byte[] rom = null;
         try {
-            rom = Files.readAllBytes(Path.of(path));
+            rom = Files.readAllBytes(path);
         } catch (Exception e) {
             System.out.println(e.toString());
             return;
         }
         for (int i = 0; i < Math.min(rom.length, 0x8000); i++) {
-            memory[i] = rom[i];
+            memory[i] = rom[i] & 0xFF;
         }
     }
 
@@ -44,8 +46,15 @@ public class MMU {
     }
 
     private void checkSerialCallback(int adress, int value) {
-        if (adress == 0xFF02 && value == 0x81 && serialCallback != null)
-            serialCallback.accept(memory[0xFF01]);
+        if (adress == 0xFF02 && value == 0x81) {
+            serialOutput.append((char) memory[0xFF01]);
+            if (serialCallback != null) {
+                serialCallback.accept(memory[0xFF01]);
+            }
+        }
+    }
 
+    public String getSerialOutput() {
+        return serialOutput.toString();
     }
 }
