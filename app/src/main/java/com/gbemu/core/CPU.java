@@ -1,7 +1,5 @@
 package com.gbemu.core;
 
-import java.lang.invoke.SwitchPoint;
-import java.util.BitSet;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -177,6 +175,14 @@ public class CPU {
         opcodes[0x85] = this::add_l;
         opcodes[0x86] = this::add_hlptr;
         opcodes[0x87] = this::add_a;
+        opcodes[0x88] = this::adc_b;
+        opcodes[0x89] = this::adc_c;
+        opcodes[0x8A] = this::adc_d;
+        opcodes[0x8B] = this::adc_e;
+        opcodes[0x8C] = this::adc_h;
+        opcodes[0x8D] = this::adc_l;
+        opcodes[0x8E] = this::adc_hlptr;
+        opcodes[0x8F] = this::adc_a;
 
         opcodes[0x90] = this::sub_b;
         opcodes[0x91] = this::sub_c;
@@ -629,6 +635,36 @@ public class CPU {
         reg.setFlagZ(reg.getA() == 0);
         cycles = 8;
     }
+
+    /* ADC */
+
+    // @formatter:off
+    private void adc_b() { adc_r_helper(reg::getB); }
+    private void adc_c() { adc_r_helper(reg::getC); }
+    private void adc_d() { adc_r_helper(reg::getD); }
+    private void adc_e() { adc_r_helper(reg::getE); }
+    private void adc_h() { adc_r_helper(reg::getH); }
+    private void adc_l() { adc_r_helper(reg::getL); }
+    private void adc_a() { adc_r_helper(reg::getA); }
+    // @formatter:on
+
+    private void adc_r_helper(IntSupplier getter) {
+        int value = getter.getAsInt();
+        int carryValue = reg.isFlagC() ? 1 : 0;
+        int result = reg.getA() + value + carryValue;
+        reg.setFlagN(false);
+        reg.setFlagH(((reg.getA() & 0xF) + (value & 0xF) + carryValue) > 0xF);
+        reg.setFlagC(result > 0xFF);
+        reg.setFlagZ((result & 0xFF) == 0);
+        reg.setA(result);
+        cycles = 4;
+    }
+
+    private void adc_hlptr() {
+        adc_r_helper(() -> (mmu.readByte(reg.getHL())));
+        cycles = 8;
+    }
+
     /* ADD */
 
     // @formatter:off

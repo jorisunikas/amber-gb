@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import java.beans.Transient;
+import java.util.function.IntConsumer;
 
 public class OpcodeALUTest extends OpcodeTestBase {
 
@@ -1371,7 +1372,7 @@ public class OpcodeALUTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_inc_de(){
+    void test_inc_de() {
         reg.setDE(0x0101);
         mmu.writeByte(0x0000, 0x13);
         assertThat(cpu.step()).isEqualTo(8);
@@ -1381,7 +1382,7 @@ public class OpcodeALUTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_inc_hl(){
+    void test_inc_hl() {
         reg.setHL(0x0101);
         mmu.writeByte(0x0000, 0x23);
         assertThat(cpu.step()).isEqualTo(8);
@@ -1391,7 +1392,7 @@ public class OpcodeALUTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_inc_sp(){
+    void test_inc_sp() {
         reg.setSP(0x0101);
         mmu.writeByte(0x0000, 0x33);
         assertThat(cpu.step()).isEqualTo(8);
@@ -1429,7 +1430,7 @@ public class OpcodeALUTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_dec_de(){
+    void test_dec_de() {
         reg.setDE(0x0101);
         mmu.writeByte(0x0000, 0x1B);
         assertThat(cpu.step()).isEqualTo(8);
@@ -1439,7 +1440,7 @@ public class OpcodeALUTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_dec_hl(){
+    void test_dec_hl() {
         reg.setHL(0x0101);
         mmu.writeByte(0x0000, 0x2B);
         assertThat(cpu.step()).isEqualTo(8);
@@ -1449,10 +1450,82 @@ public class OpcodeALUTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_dec_sp(){
+    void test_dec_sp() {
         reg.setSP(0x0101);
         mmu.writeByte(0x0000, 0x3B);
         assertThat(cpu.step()).isEqualTo(8);
         assertThat(reg.getSP()).isEqualTo(0x0100);
+    }
+
+    @Test
+    void test_adc_logic() {
+        int[] inputB = { 0x00, 0x0F, 0x0F, 0xFF };
+        int[] inputA = { 0x00, 0x00, 0x01, 0x01 };
+        boolean[] inputFlagC = { false, true, false, false };
+        int[] expected = { 0x00, 0x10, 0x10, 0x00 };
+        boolean[] expectedFlagZ = { true, false, false, true };
+        boolean[] expectedFlagH = { false, true, true, true };
+        boolean[] expectedFlagC = { false, false, false, true };
+
+        for (int i = 0; i < inputB.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(inputFlagC[i]);
+            reg.setA(inputA[i]);
+            reg.setB(inputB[i]);
+            mmu.writeByte(0x0000, 0x88);
+            assertThat(cpu.step()).isEqualTo(4);
+            assertThat(reg.getA()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedFlagZ[i]);
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
+            assertThat(reg.isFlagN()).isFalse();
+        }
+    }
+
+    @Test
+    void test_adc_all_reg() {
+        int[] opcodes = { 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8F };
+        IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            setters[i].accept(0x0F);
+            reg.setA(0x0F);
+            reg.setFlagC(true);
+            mmu.writeByte(0x0000, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(4);
+            assertThat(reg.getA()).isEqualTo(0x1F);
+            assertThat(reg.isFlagZ()).isFalse();
+            assertThat(reg.isFlagH()).isTrue();
+            assertThat(reg.isFlagC()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+        }
+    }
+
+    @Test
+    void test_adc_hlptr() {
+        int[] inputHLPTR = { 0x00, 0x0F, 0x0F, 0xFF };
+        int[] inputA = { 0x00, 0x00, 0x01, 0x01 };
+        boolean[] inputFlagC = { false, true, false, false };
+        int[] expected = { 0x00, 0x10, 0x10, 0x00 };
+        boolean[] expectedFlagZ = { true, false, false, true };
+        boolean[] expectedFlagH = { false, true, true, true };
+        boolean[] expectedFlagC = { false, false, false, true };
+
+        for (int i = 0; i < inputHLPTR.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(inputFlagC[i]);
+            reg.setA(inputA[i]);
+            reg.setHL(0x0100);
+            mmu.writeByte(0x0100, inputHLPTR[i]);
+            mmu.writeByte(0x0000, 0x8E);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getA()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedFlagZ[i]);
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
+            assertThat(reg.isFlagN()).isFalse();
+        }
+
     }
 }
