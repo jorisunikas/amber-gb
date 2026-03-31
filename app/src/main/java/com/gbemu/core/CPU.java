@@ -192,6 +192,14 @@ public class CPU {
         opcodes[0x95] = this::sub_l;
         opcodes[0x96] = this::sub_hlptr;
         opcodes[0x97] = this::sub_a;
+        opcodes[0x98] = this::sbc_b;
+        opcodes[0x99] = this::sbc_c;
+        opcodes[0x9A] = this::sbc_d;
+        opcodes[0x9B] = this::sbc_e;
+        opcodes[0x9C] = this::sbc_h;
+        opcodes[0x9D] = this::sbc_l;
+        opcodes[0x9E] = this::sbc_hlptr;
+        opcodes[0x9F] = this::sbc_a;
 
         opcodes[0xA0] = this::and_b;
         opcodes[0xA1] = this::and_c;
@@ -592,6 +600,35 @@ public class CPU {
         mmu.writeByte(reg.getHL(), value + 1);
         reg.setFlagZ(mmu.readByte(reg.getHL()) == 0);
         cycles = 12;
+    }
+
+    /* SBC */
+
+    // @formatter:off
+    private void sbc_b() { sbc_r_helper(reg::getB); }
+    private void sbc_c() { sbc_r_helper(reg::getC); }
+    private void sbc_d() { sbc_r_helper(reg::getD); }
+    private void sbc_e() { sbc_r_helper(reg::getE); }
+    private void sbc_h() { sbc_r_helper(reg::getH); }
+    private void sbc_l() { sbc_r_helper(reg::getL); }
+    private void sbc_a() { sbc_r_helper(reg::getA); }
+    // @formatter:on
+
+    private void sbc_r_helper(IntSupplier getter) {
+        int value = getter.getAsInt();
+        int valueFlag = reg.isFlagC() ? 1 : 0;
+        int result = reg.getA() - (value + valueFlag);
+        reg.setFlagH(((value & 0xF) + valueFlag) > (reg.getA() & 0xF));
+        reg.setFlagN(true);
+        reg.setFlagZ((result & 0xFF) == 0);
+        reg.setFlagC(reg.getA() < (value + valueFlag));
+        reg.setA(result);
+        cycles = 4;
+    }
+
+    private void sbc_hlptr() {
+        sbc_r_helper(() -> mmu.readByte(reg.getHL()));
+        cycles = 8;
     }
 
     /* SUB */

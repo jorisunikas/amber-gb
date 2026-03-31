@@ -1526,6 +1526,61 @@ public class OpcodeALUTest extends OpcodeTestBase {
             assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
             assertThat(reg.isFlagN()).isFalse();
         }
+    }
 
+    @Test // A - B - flagC
+    void test_sbc_logic() {
+        int[] inputA = { 0x00, 0x01, 0x20, 0x0F };
+        int[] inputB = { 0x00, 0x00, 0x1B, 0x10 };
+        boolean[] inputFlagC = { false, true, false, false };
+        int[] expected = { 0x00, 0x00, 0x05, 0xFF };
+        boolean[] expectedFlagZ = { true, true, false, false };
+        boolean[] expectedFlagH = { false, false, true, false };
+        boolean[] expectedFlagC = { false, false, false, true };
+
+        for (int i = 0; i < inputB.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(inputFlagC[i]);
+            reg.setA(inputA[i]);
+            reg.setB(inputB[i]);
+            mmu.writeByte(0x0000, 0x98);
+            assertThat(cpu.step()).isEqualTo(4);
+            assertThat(reg.getA()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedFlagZ[i]);
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
+            assertThat(reg.isFlagN()).isTrue();
+        }
+    }
+
+    @Test
+    void test_sbc_all_reg() {
+        int[] opcodes = { 0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9F };
+        IntConsumer[] setters = { reg::setB, reg::setC, reg::setD, reg::setE, reg::setH, reg::setL, reg::setA };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            setters[i].accept(0x02);
+            reg.setA(0x02);
+            reg.setFlagC(false);
+            mmu.writeByte(0x0000, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(4);
+            assertThat(reg.getA()).isEqualTo(0x00);
+            assertThat(reg.isFlagZ()).isTrue();
+            assertThat(reg.isFlagN()).isTrue();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isFalse();
+        }
+    }
+
+    @Test
+    void test_sbc_hlptr() {
+        reg.setHL(0x0100);
+        reg.setA(0x02);
+        reg.setFlagC(false);
+        mmu.writeByte(0x0100, 0x02);
+        mmu.writeByte(0x0000, 0x9E);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0x00);
     }
 }
