@@ -111,4 +111,17 @@ public class OpcodeMiscTest extends OpcodeTestBase {
             assertThat(reg.isFlagC()).isEqualTo(expectedCarryFlag[i]);
         }
     }
+
+    @Test
+
+    void test_stop(){
+        mmu.writeByte(0x0000, 0x10);
+        mmu.writeByte(0x0001, 0x00);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        assertThat(cpu.step()).isEqualTo(4);
+        int pc = reg.getPC();
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(pc).isEqualTo(reg.getPC());
+    }
 }

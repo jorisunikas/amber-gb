@@ -65,6 +65,7 @@ public class CPU {
         opcodes[0x0F] = this::rrca;
 
         // 10
+        opcodes[0x10] = this::stop;
         opcodes[0x11] = this::ld_de_u16;
         opcodes[0x12] = this::ld_deptr_a;
         opcodes[0x13] = this::inc_de;
@@ -832,7 +833,7 @@ public class CPU {
     private void add_sp() { add_rr_helper(reg::getSP);}
     // @formatter:on
 
-    private void add_rr_helper(IntSupplier getter){
+    private void add_rr_helper(IntSupplier getter) {
         int value = getter.getAsInt();
         int result = value + reg.getHL();
         reg.setFlagN(false);
@@ -1026,13 +1027,12 @@ public class CPU {
 
     /* LD */
 
-    
     // @formatter:off
     private void ld_a_bcptr() { ld_r_rrptr(reg::setA, reg::getBC); }
     private void ld_a_deptr() { ld_r_rrptr(reg::setA, reg::getDE); }
     // @formatter:on
-    
-    private void ld_r_rrptr(IntConsumer setter, IntSupplier getter){
+
+    private void ld_r_rrptr(IntConsumer setter, IntSupplier getter) {
         setter.accept(mmu.readByte(getter.getAsInt()));
         cycles = 8;
     }
@@ -1073,6 +1073,7 @@ public class CPU {
     }
 
     // @formatter:off
+    private void stop() {fetch(); halted = true; cycles = 4;}
     private void halt() { halted = true; cycles = 4; }
     private void di() { ime = false; cycles = 4; }
     private void ei() { ime = true; cycles = 4; }
