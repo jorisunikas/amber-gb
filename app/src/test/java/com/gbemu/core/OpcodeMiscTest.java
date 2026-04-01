@@ -126,13 +126,13 @@ public class OpcodeMiscTest extends OpcodeTestBase {
 
     @Test
     void test_daa() {
-        int[] input = { 0x8B, 0x9C, 0x10, 0x11, 0x0D, 0xE4};
-        int[] expected = { 0x91, 0x02, 0x70, 0x17, 0x07, 0x84};
-        boolean[] inputFlagN = { false, false, false, false, true, true};
-        boolean[] inputFlagC = { false, true, true, false, false, true};
-        boolean[] inputFlagH = { false, false, false, true, true, false};
-        boolean[] expectedFlagC = { false, true, true, false, false, true};
-        boolean[] expectedFlagZ = { false, false, false, false, false, false};
+        int[] input = { 0x8B, 0x9C, 0x10, 0x11, 0x0D, 0xE4 };
+        int[] expected = { 0x91, 0x02, 0x70, 0x17, 0x07, 0x84 };
+        boolean[] inputFlagN = { false, false, false, false, true, true };
+        boolean[] inputFlagC = { false, true, true, false, false, true };
+        boolean[] inputFlagH = { false, false, false, true, true, false };
+        boolean[] expectedFlagC = { false, true, true, false, false, true };
+        boolean[] expectedFlagZ = { false, false, false, false, false, false };
         for (int i = 0; i < input.length; i++) {
             reg.setPC(0x0000);
             reg.setA(input[i]);
@@ -145,5 +145,15 @@ public class OpcodeMiscTest extends OpcodeTestBase {
             assertThat(reg.isFlagZ()).isEqualTo(expectedFlagZ[i]);
             assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
         }
+    }
+
+    @Test
+    void test_cpl() {
+        reg.setA(0xA5);
+        mmu.writeByte(0x0000, 0x2F);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getA()).isEqualTo(0x5A);
+        assertThat(reg.isFlagH()).isTrue();
+        assertThat(reg.isFlagN()).isTrue();
     }
 }

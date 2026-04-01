@@ -96,6 +96,7 @@ public class CPU {
         opcodes[0x2C] = this::inc_l;
         opcodes[0x2D] = this::dec_l;
         opcodes[0x2E] = this::ld_l_u8;
+        opcodes[0x2F] = this::cpl;
         // 2F
 
         opcodes[0x30] = this::jr_nc_s8;
@@ -355,6 +356,13 @@ public class CPU {
     /* OPCODES */
 
     /* MISC */
+
+    private void cpl() {
+        reg.setA((~reg.getA()) & 0xFF);
+        reg.setFlagH(true);
+        reg.setFlagN(true);
+        cycles = 4;
+    }
 
     private void daa() {
         boolean addition = !reg.isFlagN();
