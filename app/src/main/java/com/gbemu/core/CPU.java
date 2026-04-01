@@ -64,7 +64,6 @@ public class CPU {
         opcodes[0x0E] = this::ld_c_u8;
         opcodes[0x0F] = this::rrca;
 
-        // 10
         opcodes[0x10] = this::stop;
         opcodes[0x11] = this::ld_de_u16;
         opcodes[0x12] = this::ld_deptr_a;
@@ -81,7 +80,6 @@ public class CPU {
         opcodes[0x1D] = this::dec_e;
         opcodes[0x1E] = this::ld_e_u8;
         opcodes[0x1F] = this::rra;
-        // 1F
 
         opcodes[0x20] = this::jr_nz_s8;
         opcodes[0x21] = this::ld_hl_u16;
@@ -90,7 +88,7 @@ public class CPU {
         opcodes[0x24] = this::inc_h;
         opcodes[0x25] = this::dec_h;
         opcodes[0x26] = this::ld_h_u8;
-        // 27
+        opcodes[0x27] = this::daa;
         opcodes[0x28] = this::jr_z_s8;
         opcodes[0x29] = this::add_hl;
         opcodes[0x2A] = this::ld_a_hlptr_inc;
@@ -357,6 +355,30 @@ public class CPU {
     /* OPCODES */
 
     /* MISC */
+
+    private void daa() {
+        boolean addition = !reg.isFlagN();
+        int value = reg.getA();
+        int correction = 0;
+        if (addition) {
+            if ((value & 0xF) >= 0xA || reg.isFlagH())
+                correction |= 0x06;
+            if ((value & 0xFF) > 0x99 || reg.isFlagC())
+                correction |= 0x60;
+            value += correction;
+        } else {
+            if (reg.isFlagH())
+                correction |= 0x06;
+            if (reg.isFlagC())
+                correction |= 0x60;
+            value -= correction;
+        }
+        reg.setFlagH(false);
+        reg.setFlagC(correction >= 0x60);
+        reg.setFlagZ((value & 0xFF) == 0);
+        reg.setA(value);
+        cycles = 4;
+    }
 
     private void ld_u16ptr_sp() {
         int adress = get_u16();
