@@ -57,7 +57,7 @@ public class CPU {
         opcodes[0x07] = this::rlca;
         opcodes[0x08] = this::ld_u16ptr_sp;
         opcodes[0x09] = this::add_bc;
-        // 0A
+        opcodes[0x0A] = this::ld_a_bcptr;
         opcodes[0x0B] = this::dec_bc;
         opcodes[0x0C] = this::inc_c;
         opcodes[0x0D] = this::dec_c;
@@ -74,7 +74,7 @@ public class CPU {
         opcodes[0x17] = this::rla;
         opcodes[0x18] = this::jr_s8;
         opcodes[0x19] = this::add_de;
-        // 1A
+        opcodes[0x1A] = this::ld_a_deptr;
         opcodes[0x1B] = this::dec_de;
         opcodes[0x1C] = this::inc_e;
         opcodes[0x1D] = this::dec_e;
@@ -1025,6 +1025,17 @@ public class CPU {
     }
 
     /* LD */
+
+    
+    // @formatter:off
+    private void ld_a_bcptr() { ld_r_rrptr(reg::setA, reg::getBC); }
+    private void ld_a_deptr() { ld_r_rrptr(reg::setA, reg::getDE); }
+    // @formatter:on
+    
+    private void ld_r_rrptr(IntConsumer setter, IntSupplier getter){
+        setter.accept(mmu.readByte(getter.getAsInt()));
+        cycles = 8;
+    }
 
     // @formatter:off
     private void ld_a_hlptr_inc() { ld_a_hlptr(); reg.incHL(); }

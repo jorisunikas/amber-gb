@@ -2,6 +2,8 @@ package com.gbemu.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.function.IntConsumer;
+
 import org.junit.jupiter.api.Test;
 
 public class OpcodeLoad8Test extends OpcodeTestBase {
@@ -672,4 +674,17 @@ public class OpcodeLoad8Test extends OpcodeTestBase {
         assertThat(reg.getA()).isEqualTo(0x42);
     }
 
+    @Test
+    void load_a_rrptr() {
+        int[] opcodes = { 0x0A, 0x1A };
+        IntConsumer[] setters = { reg::setBC, reg::setDE };
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            setters[i].accept(0x0100);
+            mmu.writeByte(0x0100, 0x12);
+            mmu.writeByte(0x0000, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getA()).isEqualTo(0x12);
+        }
+    }
 }
