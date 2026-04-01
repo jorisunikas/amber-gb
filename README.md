@@ -8,8 +8,8 @@ Working towards the first milestone: passing [Blargg's test ROMs](https://gbdev.
 
 | Metric     | Count     |
 |------------|-----------|
-| Opcodes    | 410 / 512 |
-| Unit tests | 303       |
+| Opcodes    | 491 / 512 |
+| Unit tests | 322       |
 
 Unit tests are written manually for each opcode. This is because basic CPU functionality is required to boot the ROMs.
 
@@ -44,7 +44,7 @@ The output `amber-gb.jar` will be located in app/build/libs directory.
 
 ## Features
 
-- CPU: 410 of 512 opcodes implemented, each covered by unit tests.
+- CPU: 491 of 512 opcodes implemented, each covered by unit tests.
 - MMU: 64KB memory map, ROM loading from disk, Serial port callback for Blargg's test output.
 - Display: early-stage Swing window.
 
