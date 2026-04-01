@@ -97,7 +97,6 @@ public class CPU {
         opcodes[0x2D] = this::dec_l;
         opcodes[0x2E] = this::ld_l_u8;
         opcodes[0x2F] = this::cpl;
-        // 2F
 
         opcodes[0x30] = this::jr_nc_s8;
         opcodes[0x31] = this::ld_sp_u16;
@@ -271,7 +270,9 @@ public class CPU {
         opcodes[0xD0] = this::ret_nc;
         opcodes[0xD1] = this::pop_de;
         opcodes[0xD2] = this::jp_nc_u16;
-        // D3
+        opcodes[0xD3] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xD3");
+        };
         // D4
         opcodes[0xD5] = this::push_de;
         opcodes[0xD6] = this::sub_u8;
@@ -279,25 +280,40 @@ public class CPU {
         opcodes[0xD8] = this::ret_c;
         // D9
         opcodes[0xDA] = this::jp_c_u16;
-        // DB
+        opcodes[0xDB] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
         // DC
-        // DD
+        opcodes[0xDD] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDD");
+        };
         // DE
         // DF
 
         opcodes[0xE0] = this::ldh_u8ptr_a;
         opcodes[0xE1] = this::pop_hl;
         // E2
-        // E3
-        // E4
+        opcodes[0xE3] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
+        opcodes[0xE4] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
         opcodes[0xE5] = this::push_hl;
         opcodes[0xE6] = this::and_u8;
         // E7
         // E8
         // E9
         opcodes[0xEA] = this::ld_u16ptr_a;
-        // EB
-        // EC
+        opcodes[0xEB] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
+        opcodes[0xEC] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
+        opcodes[0xED] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
         // ED
         opcodes[0xEE] = this::xor_u8;
         // EF
@@ -306,14 +322,20 @@ public class CPU {
         opcodes[0xF1] = this::pop_af;
         // F2
         opcodes[0xF3] = this::di;
-        // F4
+        opcodes[0xF4] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
         opcodes[0xF5] = this::push_af;
         opcodes[0xF6] = this::or_u8;
         // F7
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
-        // FC
-        // FD
+        opcodes[0xFC] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
+        opcodes[0xFD] = () -> {
+            throw new IllegalStateException("Illegal opcode: 0xDB");
+        };
         opcodes[0xFE] = this::cp_u8;
         // FF
     }
