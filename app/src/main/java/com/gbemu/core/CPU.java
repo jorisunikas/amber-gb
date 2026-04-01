@@ -55,7 +55,7 @@ public class CPU {
         opcodes[0x05] = this::dec_b;
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x07] = this::rlca;
-        // 07
+        opcodes[0x08] = this::ld_u16ptr_sp;
         // 08
         // 09
         // 0A
@@ -356,7 +356,14 @@ public class CPU {
 
     /* MISC */
 
-    private void rlca(){
+    private void ld_u16ptr_sp() {
+        int adress = get_u16();
+        mmu.writeByte(adress, reg.getSP() & 0xFF);
+        mmu.writeByte(adress + 1, (reg.getSP() >> 8) & 0xFF);
+        cycles = 20;
+    }
+
+    private void rlca() {
         rlc_helper(0x07);
         reg.setFlagZ(false);
         cycles = 4;
