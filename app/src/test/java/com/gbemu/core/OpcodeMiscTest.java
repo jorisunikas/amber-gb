@@ -156,4 +156,33 @@ public class OpcodeMiscTest extends OpcodeTestBase {
         assertThat(reg.isFlagH()).isTrue();
         assertThat(reg.isFlagN()).isTrue();
     }
+
+    @Test
+    void test_scf() {
+        reg.setFlagC(false);
+        mmu.writeByte(0x0000, 0x37);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.isFlagC()).isTrue();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    @Test
+    void test_ccf_0() {
+        reg.setFlagC(false);
+        mmu.writeByte(0x0000, 0x3F);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.isFlagC()).isTrue();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
+
+    void test_ccf_1() {
+        reg.setFlagC(true);
+        mmu.writeByte(0x0000, 0x3F);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.isFlagC()).isFalse();
+        assertThat(reg.isFlagN()).isFalse();
+        assertThat(reg.isFlagH()).isFalse();
+    }
 }

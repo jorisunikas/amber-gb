@@ -106,7 +106,7 @@ public class CPU {
         opcodes[0x34] = this::inc_hlptr;
         opcodes[0x35] = this::dec_hlptr;
         opcodes[0x36] = this::ld_hlptr_u8;
-        // 37
+        opcodes[0x37] = this::scf;
         opcodes[0x38] = this::jr_c_s8;
         opcodes[0x39] = this::add_sp;
         opcodes[0x3A] = this::ld_a_hlptr_dec;
@@ -114,7 +114,7 @@ public class CPU {
         opcodes[0x3C] = this::inc_a;
         opcodes[0x3D] = this::dec_a;
         opcodes[0x3E] = this::ld_a_u8;
-        // 3F
+        opcodes[0x3F] = this::ccf;
 
         opcodes[0x40] = this::ld_b_b;
         opcodes[0x41] = this::ld_b_c;
@@ -356,6 +356,20 @@ public class CPU {
     /* OPCODES */
 
     /* MISC */
+
+    private void scf() {
+        reg.setFlagC(true);
+        reg.setFlagN(false);
+        reg.setFlagH(false);
+        cycles = 4;
+    }
+
+    private void ccf() {
+        reg.setFlagC(!reg.isFlagC());
+        reg.setFlagN(false);
+        reg.setFlagH(false);
+        cycles = 4;
+    }
 
     private void cpl() {
         reg.setA((~reg.getA()) & 0xFF);
