@@ -1583,4 +1583,45 @@ public class OpcodeALUTest extends OpcodeTestBase {
         assertThat(cpu.step()).isEqualTo(8);
         assertThat(reg.getA()).isEqualTo(0x00);
     }
+
+    @Test
+    void test_add_rr_logic() {
+        int[] input = { 0x00, 0x0800, 0xF000 };
+        int[] inputHL = { 0x00, 0x0800, 0x1000 };
+        int[] expected = { 0x00, 0x1000, 0x0000 };
+        boolean[] inputFlagZ = { true, true, false };
+        boolean[] expectedFlagH = { false, true, false };
+        boolean[] expectedFlagC = { false, false, true };
+
+        for (int i = 0; i < input.length; i++) {
+            reg.setPC(0x0000);
+            reg.setHL(inputHL[i]);
+            reg.setBC(input[i]);
+            reg.setFlagZ(inputFlagZ[i]);
+            mmu.writeByte(0x0000, 0x09);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getHL()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(inputFlagZ[i]);
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
+        }
+    }
+
+    @Test
+    void test_add_rr_all_reg() {
+        int[] opcodes = { 0x09, 0x19, 0x29, 0x39 };
+        IntConsumer[] setters = { reg::setBC, reg::setDE, reg::setHL, reg::setSP };
+
+        for(int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            setters[i].accept(0x0001);
+            reg.setHL(0x0001);
+            mmu.writeByte(0x0000, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getHL()).isEqualTo(0x0002);
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isFalse();
+            assertThat(reg.isFlagC()).isFalse();
+        }
+    }
 }

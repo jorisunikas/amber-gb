@@ -56,8 +56,7 @@ public class CPU {
         opcodes[0x06] = this::ld_b_u8;
         opcodes[0x07] = this::rlca;
         opcodes[0x08] = this::ld_u16ptr_sp;
-        // 08
-        // 09
+        opcodes[0x09] = this::add_bc;
         // 0A
         opcodes[0x0B] = this::dec_bc;
         opcodes[0x0C] = this::inc_c;
@@ -74,7 +73,7 @@ public class CPU {
         opcodes[0x16] = this::ld_d_u8;
         opcodes[0x17] = this::rla;
         opcodes[0x18] = this::jr_s8;
-        // 19
+        opcodes[0x19] = this::add_de;
         // 1A
         opcodes[0x1B] = this::dec_de;
         opcodes[0x1C] = this::inc_e;
@@ -92,6 +91,7 @@ public class CPU {
         opcodes[0x26] = this::ld_h_u8;
         // 27
         opcodes[0x28] = this::jr_z_s8;
+        opcodes[0x29] = this::add_hl;
         opcodes[0x2A] = this::ld_a_hlptr_inc;
         opcodes[0x2B] = this::dec_hl;
         opcodes[0x2C] = this::inc_l;
@@ -108,6 +108,7 @@ public class CPU {
         opcodes[0x36] = this::ld_hlptr_u8;
         // 37
         opcodes[0x38] = this::jr_c_s8;
+        opcodes[0x39] = this::add_sp;
         opcodes[0x3A] = this::ld_a_hlptr_dec;
         opcodes[0x3B] = this::dec_sp;
         opcodes[0x3C] = this::inc_a;
@@ -819,6 +820,25 @@ public class CPU {
         reg.setFlagC((reg.getA() + value) > 0xFF);
         reg.setA(reg.getA() + value);
         reg.setFlagZ(reg.getA() == 0);
+        cycles = 8;
+    }
+
+    /* ADD RR */
+
+    // @formatter:off
+    private void add_bc() { add_rr_helper(reg::getBC);}
+    private void add_de() { add_rr_helper(reg::getDE);}
+    private void add_hl() { add_rr_helper(reg::getHL);}
+    private void add_sp() { add_rr_helper(reg::getSP);}
+    // @formatter:on
+
+    private void add_rr_helper(IntSupplier getter){
+        int value = getter.getAsInt();
+        int result = value + reg.getHL();
+        reg.setFlagN(false);
+        reg.setFlagC(result > 0xFFFF);
+        reg.setFlagH(((value & 0xFFF) + (reg.getHL() & 0xFFF)) > 0xFFF);
+        reg.setHL(result);
         cycles = 8;
     }
 
