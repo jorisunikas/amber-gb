@@ -294,10 +294,10 @@ public class CPU {
         opcodes[0xE1] = this::pop_hl;
         // E2
         opcodes[0xE3] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xE3");
         };
         opcodes[0xE4] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xE4");
         };
         opcodes[0xE5] = this::push_hl;
         opcodes[0xE6] = this::and_u8;
@@ -306,13 +306,13 @@ public class CPU {
         // E9
         opcodes[0xEA] = this::ld_u16ptr_a;
         opcodes[0xEB] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xEB");
         };
         opcodes[0xEC] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xEC");
         };
         opcodes[0xED] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xED");
         };
         // ED
         opcodes[0xEE] = this::xor_u8;
@@ -323,7 +323,7 @@ public class CPU {
         // F2
         opcodes[0xF3] = this::di;
         opcodes[0xF4] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xF4");
         };
         opcodes[0xF5] = this::push_af;
         opcodes[0xF6] = this::or_u8;
@@ -331,10 +331,10 @@ public class CPU {
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
         opcodes[0xFC] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xFC");
         };
         opcodes[0xFD] = () -> {
-            throw new IllegalStateException("Illegal opcode: 0xDB");
+            throw new IllegalStateException("Illegal opcode: 0xFD");
         };
         opcodes[0xFE] = this::cp_u8;
         // FF
