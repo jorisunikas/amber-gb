@@ -262,7 +262,7 @@ public class CPU {
         opcodes[0xC9] = this::ret;
         opcodes[0xCA] = this::jp_z_u16;
         opcodes[0xCB] = this::handle_cb;
-        // CC
+        opcodes[0xCC] = this::call_z_u16;
         opcodes[0xCD] = this::call_u16;
         // CE
         opcodes[0xCF] = this::rst_1;
@@ -283,7 +283,7 @@ public class CPU {
         opcodes[0xDB] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xDB");
         };
-        // DC
+        opcodes[0xDC] = this::call_c_u16;
         opcodes[0xDD] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xDD");
         };
@@ -1275,7 +1275,7 @@ public class CPU {
     private void rst_6() { rst_helper(0x30); }
     private void rst_7() { rst_helper(0x38); }
     // @formatter:on
-    
+
     private void rst_helper(int value) {
         reg.decSP();
         mmu.writeByte(reg.getSP(), (reg.getPC() >> 8) & 0xFF);
@@ -1298,6 +1298,28 @@ public class CPU {
         reg.setPC(address);
         cycles = 24;
 
+    }
+
+    private void call_z_u16() {
+        if (reg.isFlagZ()) {
+            call_u16();
+            return;
+        }
+        fetch();
+        fetch();
+        cycles = 12;
+        return;
+    }
+
+    private void call_c_u16() {
+        if (reg.isFlagC()) {
+            call_u16();
+            return;
+        }
+        fetch();
+        fetch();
+        cycles = 12;
+        return;
     }
 
     /* RET */

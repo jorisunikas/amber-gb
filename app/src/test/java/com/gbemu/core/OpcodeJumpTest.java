@@ -1,6 +1,10 @@
 package com.gbemu.core;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.security.spec.ECParameterSpec;
+import java.util.function.IntConsumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -314,6 +318,40 @@ public class OpcodeJumpTest extends OpcodeTestBase {
             assertThat(mmu.readByte(0x0FFF)).isEqualTo(0x00);
             assertThat(mmu.readByte(0x0FFE)).isEqualTo(0x01);
             assertThat(reg.getPC()).isEqualTo(expected[i]);
+        }
+    }
+
+    @Test
+    void test_call_Z_u16() {
+        boolean[] values = {true, false};
+        int[] expectedCycles = {24, 12};
+        int[] expectedPC = {0x3412, 0x0003};
+
+        for(int i=0;i<values.length;i++){
+            reg.setPC(0x0000);
+            reg.setFlagZ(values[i]);
+            mmu.writeByte(0x0000, 0xCC);
+            mmu.writeByte(0x0001, 0x12);
+            mmu.writeByte(0x0002, 0x34);
+            assertThat(cpu.step()).isEqualTo(expectedCycles[i]);
+            assertThat(reg.getPC()).isEqualTo(expectedPC[i]);
+        }
+    }
+
+    @Test
+    void test_call_C_u16() {
+        boolean[] values = {true, false};
+        int[] expectedCycles = {24, 12};
+        int[] expectedPC = {0x3412, 0x0003};
+
+        for(int i=0;i<values.length;i++){
+            reg.setPC(0x0000);
+            reg.setFlagC(values[i]);
+            mmu.writeByte(0x0000, 0xDC);
+            mmu.writeByte(0x0001, 0x12);
+            mmu.writeByte(0x0002, 0x34);
+            assertThat(cpu.step()).isEqualTo(expectedCycles[i]);
+            assertThat(reg.getPC()).isEqualTo(expectedPC[i]);
         }
     }
 }
