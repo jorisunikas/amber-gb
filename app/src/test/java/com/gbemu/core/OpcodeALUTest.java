@@ -1624,4 +1624,54 @@ public class OpcodeALUTest extends OpcodeTestBase {
             assertThat(reg.isFlagC()).isFalse();
         }
     }
+
+    @Test
+    void test_adc_u8() {
+        int[] inputU8 = { 0x00, 0x0F, 0x0F, 0xFF };
+        int[] inputA = { 0x00, 0x00, 0x01, 0x01 };
+        boolean[] inputFlagC = { false, true, false, false };
+        int[] expected = { 0x00, 0x10, 0x10, 0x00 };
+        boolean[] expectedFlagZ = { true, false, false, true };
+        boolean[] expectedFlagH = { false, true, true, true };
+        boolean[] expectedFlagC = { false, false, false, true };
+
+        for (int i = 0; i < inputU8.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(inputFlagC[i]);
+            reg.setA(inputA[i]);
+            mmu.writeByte(0x0000, 0xCE);
+            mmu.writeByte(0x0001, inputU8[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getA()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedFlagZ[i]);
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
+        }
+    }
+
+    @Test
+    void test_sbc_u8() {
+        int[] inputA = { 0x00, 0x01, 0x20, 0x0F };
+        int[] inputU8 = { 0x00, 0x00, 0x1B, 0x10 };
+        boolean[] inputFlagC = { false, true, false, false };
+        int[] expected = { 0x00, 0x00, 0x05, 0xFF };
+        boolean[] expectedFlagZ = { true, true, false, false };
+        boolean[] expectedFlagH = { false, false, true, false };
+        boolean[] expectedFlagC = { false, false, false, true };
+
+        for (int i = 0; i < inputU8.length; i++) {
+            reg.setPC(0x0000);
+            reg.setFlagC(inputFlagC[i]);
+            reg.setA(inputA[i]);
+            mmu.writeByte(0x0000, 0xDE);
+            mmu.writeByte(0x0001, inputU8[i]);
+            assertThat(cpu.step()).isEqualTo(8);
+            assertThat(reg.getA()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isEqualTo(expectedFlagZ[i]);
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
+            assertThat(reg.isFlagN()).isTrue();
+        }
+    }
 }

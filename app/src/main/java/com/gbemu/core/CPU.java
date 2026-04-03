@@ -264,7 +264,7 @@ public class CPU {
         opcodes[0xCB] = this::handle_cb;
         opcodes[0xCC] = this::call_z_u16;
         opcodes[0xCD] = this::call_u16;
-        // CE
+        opcodes[0xCE] = this::adc_u8;
         opcodes[0xCF] = this::rst_1;
 
         opcodes[0xD0] = this::ret_nc;
@@ -287,7 +287,7 @@ public class CPU {
         opcodes[0xDD] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xDD");
         };
-        // DE
+        opcodes[0xDE] = this::sbc_u8;
         opcodes[0xDF] = this::rst_3;
 
         opcodes[0xE0] = this::ldh_u8ptr_a;
@@ -314,7 +314,6 @@ public class CPU {
         opcodes[0xED] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xED");
         };
-        // ED
         opcodes[0xEE] = this::xor_u8;
         opcodes[0xEF] = this::rst_5;
 
@@ -777,6 +776,11 @@ public class CPU {
         cycles = 8;
     }
 
+    private void sbc_u8() {
+        sbc_r_helper(() -> fetch());
+        cycles = 8;
+    }
+
     /* SUB */
 
     // @formatter:off
@@ -845,6 +849,11 @@ public class CPU {
 
     private void adc_hlptr() {
         adc_r_helper(() -> (mmu.readByte(reg.getHL())));
+        cycles = 8;
+    }
+
+    private void adc_u8() {
+        adc_r_helper(() -> fetch());
         cycles = 8;
     }
 
