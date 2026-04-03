@@ -255,6 +255,7 @@ public class CPU {
         opcodes[0xC1] = this::pop_bc;
         opcodes[0xC2] = this::jp_nz_u16;
         opcodes[0xC3] = this::jp_u16;
+        opcodes[0xC4] = this::call_nz_u16;
         opcodes[0xC5] = this::push_bc;
         opcodes[0xC6] = this::add_u8;
         opcodes[0xC7] = this::rst_0;
@@ -273,7 +274,7 @@ public class CPU {
         opcodes[0xD3] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xD3");
         };
-        // D4
+        opcodes[0xD4] = this::call_nc_u16;
         opcodes[0xD5] = this::push_de;
         opcodes[0xD6] = this::sub_u8;
         opcodes[0xD7] = this::rst_2;
@@ -1322,6 +1323,28 @@ public class CPU {
 
     private void call_c_u16() {
         if (reg.isFlagC()) {
+            call_u16();
+            return;
+        }
+        fetch();
+        fetch();
+        cycles = 12;
+        return;
+    }
+
+    private void call_nz_u16() {
+        if (!reg.isFlagZ()) {
+            call_u16();
+            return;
+        }
+        fetch();
+        fetch();
+        cycles = 12;
+        return;
+    }
+
+    private void call_nc_u16() {
+        if (!reg.isFlagC()) {
             call_u16();
             return;
         }

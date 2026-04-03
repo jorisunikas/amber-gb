@@ -322,7 +322,7 @@ public class OpcodeJumpTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_call_Z_u16() {
+    void test_call_z_u16() {
         boolean[] values = {true, false};
         int[] expectedCycles = {24, 12};
         int[] expectedPC = {0x3412, 0x0003};
@@ -339,7 +339,7 @@ public class OpcodeJumpTest extends OpcodeTestBase {
     }
 
     @Test
-    void test_call_C_u16() {
+    void test_call_c_u16() {
         boolean[] values = {true, false};
         int[] expectedCycles = {24, 12};
         int[] expectedPC = {0x3412, 0x0003};
@@ -348,6 +348,40 @@ public class OpcodeJumpTest extends OpcodeTestBase {
             reg.setPC(0x0000);
             reg.setFlagC(values[i]);
             mmu.writeByte(0x0000, 0xDC);
+            mmu.writeByte(0x0001, 0x12);
+            mmu.writeByte(0x0002, 0x34);
+            assertThat(cpu.step()).isEqualTo(expectedCycles[i]);
+            assertThat(reg.getPC()).isEqualTo(expectedPC[i]);
+        }
+    }
+
+    @Test
+    void test_call_nz_u16() {
+        boolean[] values = {false, true};
+        int[] expectedCycles = {24, 12};
+        int[] expectedPC = {0x3412, 0x0003};
+
+        for(int i=0;i<values.length;i++){
+            reg.setPC(0x0000);
+            reg.setFlagZ(values[i]);
+            mmu.writeByte(0x0000, 0xC4);
+            mmu.writeByte(0x0001, 0x12);
+            mmu.writeByte(0x0002, 0x34);
+            assertThat(cpu.step()).isEqualTo(expectedCycles[i]);
+            assertThat(reg.getPC()).isEqualTo(expectedPC[i]);
+        }
+    }
+
+    @Test
+    void test_call_nc_u16() {
+        boolean[] values = {false, true};
+        int[] expectedCycles = {24, 12};
+        int[] expectedPC = {0x3412, 0x0003};
+
+        for(int i=0;i<values.length;i++){
+            reg.setPC(0x0000);
+            reg.setFlagC(values[i]);
+            mmu.writeByte(0x0000, 0xD4);
             mmu.writeByte(0x0001, 0x12);
             mmu.writeByte(0x0002, 0x34);
             assertThat(cpu.step()).isEqualTo(expectedCycles[i]);
