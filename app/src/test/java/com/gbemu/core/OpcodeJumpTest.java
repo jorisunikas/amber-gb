@@ -300,4 +300,20 @@ public class OpcodeJumpTest extends OpcodeTestBase {
         assertThat(cpu.step()).as("jr c u16 cycles = 12").isEqualTo(12);
         assertThat(reg.getPC()).isEqualTo(0x0003);
     }
+
+    @Test
+    void test_rst_all() {
+        int[] opcodes = { 0xC7, 0xCF, 0xD7, 0xDF, 0xE7, 0xEF, 0xF7, 0xFF };
+        int[] expected = { 0x0000, 0x0008, 0x0010, 0x0018, 0x0020, 0x0028, 0x0030, 0x0038 };
+
+        for (int i = 0; i < opcodes.length; i++) {
+            reg.setPC(0x0000);
+            reg.setSP(0x1000);
+            mmu.writeByte(0x0000, opcodes[i]);
+            assertThat(cpu.step()).isEqualTo(16);
+            assertThat(mmu.readByte(0x0FFF)).isEqualTo(0x00);
+            assertThat(mmu.readByte(0x0FFE)).isEqualTo(0x01);
+            assertThat(reg.getPC()).isEqualTo(expected[i]);
+        }
+    }
 }

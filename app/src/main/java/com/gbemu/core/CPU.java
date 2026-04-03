@@ -257,7 +257,7 @@ public class CPU {
         opcodes[0xC3] = this::jp_u16;
         opcodes[0xC5] = this::push_bc;
         opcodes[0xC6] = this::add_u8;
-        // C7
+        opcodes[0xC7] = this::rst_0;
         opcodes[0xC8] = this::ret_z;
         opcodes[0xC9] = this::ret;
         opcodes[0xCA] = this::jp_z_u16;
@@ -265,7 +265,7 @@ public class CPU {
         // CC
         opcodes[0xCD] = this::call_u16;
         // CE
-        // CF
+        opcodes[0xCF] = this::rst_1;
 
         opcodes[0xD0] = this::ret_nc;
         opcodes[0xD1] = this::pop_de;
@@ -276,7 +276,7 @@ public class CPU {
         // D4
         opcodes[0xD5] = this::push_de;
         opcodes[0xD6] = this::sub_u8;
-        // D7
+        opcodes[0xD7] = this::rst_2;
         opcodes[0xD8] = this::ret_c;
         // D9
         opcodes[0xDA] = this::jp_c_u16;
@@ -288,7 +288,7 @@ public class CPU {
             throw new IllegalStateException("Illegal opcode: 0xDD");
         };
         // DE
-        // DF
+        opcodes[0xDF] = this::rst_3;
 
         opcodes[0xE0] = this::ldh_u8ptr_a;
         opcodes[0xE1] = this::pop_hl;
@@ -301,7 +301,7 @@ public class CPU {
         };
         opcodes[0xE5] = this::push_hl;
         opcodes[0xE6] = this::and_u8;
-        // E7
+        opcodes[0xE7] = this::rst_4;
         // E8
         // E9
         opcodes[0xEA] = this::ld_u16ptr_a;
@@ -316,7 +316,7 @@ public class CPU {
         };
         // ED
         opcodes[0xEE] = this::xor_u8;
-        // EF
+        opcodes[0xEF] = this::rst_5;
 
         opcodes[0xF0] = this::ldh_a_u8ptr;
         opcodes[0xF1] = this::pop_af;
@@ -327,7 +327,7 @@ public class CPU {
         };
         opcodes[0xF5] = this::push_af;
         opcodes[0xF6] = this::or_u8;
-        // F7
+        opcodes[0xF7] = this::rst_6;
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
         opcodes[0xFC] = () -> {
@@ -337,7 +337,7 @@ public class CPU {
             throw new IllegalStateException("Illegal opcode: 0xFD");
         };
         opcodes[0xFE] = this::cp_u8;
-        // FF
+        opcodes[0xFF] = this::rst_7;
     }
 
     /* HELPER FUNCTIONS */
@@ -1261,6 +1261,28 @@ public class CPU {
     private void ld_r_u8_helper(IntConsumer setter) {
         setter.accept(fetch());
         cycles = 8;
+    }
+
+    /* RST */
+
+    // @formatter:off
+    private void rst_0() { rst_helper(0x00); }
+    private void rst_1() { rst_helper(0x08); }
+    private void rst_2() { rst_helper(0x10); }
+    private void rst_3() { rst_helper(0x18); }
+    private void rst_4() { rst_helper(0x20); }
+    private void rst_5() { rst_helper(0x28); }
+    private void rst_6() { rst_helper(0x30); }
+    private void rst_7() { rst_helper(0x38); }
+    // @formatter:on
+    
+    private void rst_helper(int value) {
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), (reg.getPC() >> 8) & 0xFF);
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), (reg.getPC() & 0xFF));
+        reg.setPC(value);
+        cycles = 16;
     }
 
     /* CALL */
