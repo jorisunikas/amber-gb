@@ -328,7 +328,7 @@ public class CPU {
         opcodes[0xF5] = this::push_af;
         opcodes[0xF6] = this::or_u8;
         opcodes[0xF7] = this::rst_6;
-        // F8
+        opcodes[0xF8] = this::ld_hl_sp_plus_s8;
         // F9
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
@@ -1125,6 +1125,17 @@ public class CPU {
     }
 
     /* LD */
+
+    private void ld_hl_sp_plus_s8(){
+        int value = (byte) fetch();
+        int result = value + reg.getSP();
+        reg.setFlagZ(false);
+        reg.setFlagN(false);
+        reg.setFlagH(((value & 0xF) + (reg.getSP() & 0xF)) > 0xF);
+        reg.setFlagC(((value & 0xFF) + (reg.getSP() & 0xFF)) > 0xFF);
+        reg.setHL(result);
+        cycles = 12;
+    }
 
     // @formatter:off
     private void ld_a_bcptr() { ld_r_rrptr(reg::setA, reg::getBC); }

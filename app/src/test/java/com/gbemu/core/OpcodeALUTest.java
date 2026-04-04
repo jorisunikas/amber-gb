@@ -1696,4 +1696,26 @@ public class OpcodeALUTest extends OpcodeTestBase {
             assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
         }
     }
+
+    @Test
+    void ld_hl_sp_plus_s8(){
+        int[] input = {0x00, 0x0F, 0x01};
+        int[] inputSP = {0x00, 0x0F, 0xFF};
+        int[] expected = {0, 0x1E, 0x0100};
+        boolean[] expectedFlagH = {false, true, true};
+        boolean[] expectedFlagC = {false, false, true};
+
+        for (int i = 0; i < input.length; i++) {
+            reg.setPC(0x0000);
+            reg.setSP(inputSP[i]);
+            mmu.writeByte(0x0000, 0xF8);
+            mmu.writeByte(0x0001, input[i]);
+            assertThat(cpu.step()).isEqualTo(12);
+            assertThat(reg.getHL()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
+        }
+    }
 }
