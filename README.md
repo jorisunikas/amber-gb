@@ -4,14 +4,33 @@ Amber GB is a WIP Game Boy (DMG) emulator written in Java 21.
 
 ## Current Status
 
-Working towards the first milestone: passing [Blargg's test ROMs](https://gbdev.gg8.se/wiki/articles/Test_ROMs).
+Working towards implementing the PPU (Pixel Processing Unit).
 
-| Metric     | Count     |
-|------------|-----------|
-| Opcodes    | 491 / 512 |
-| Unit tests | 322       |
+## Features
 
-Unit tests are written manually for each opcode. This is because basic CPU functionality is required to boot the ROMs.
+- CPU: fully implemented instruction set (512 opcodes), functioning interrupt system.
+- MMU: 64KB memory map, ROM loading from disk.
+- Timer: fully implemented 4 registers, interrupt request upon overflow, integrated with CPU's interrupt system.
+- Display: early-stage Swing window.
+
+## Testing
+
+All 11 individual [Blargg's CPU instruction](https://gbdev.gg8.se/wiki/articles/Test_ROMs) test ROMs pass:
+
+| Test                    | Result |
+|-------------------------|--------|
+| 01-special              | Pass   |
+| 02-interrupts           | Pass   |
+| 03-op sp,hl             | Pass   |
+| 04-op r,imm             | Pass   |
+| 05-op rp                | Pass   |
+| 06-ld r,r               | Pass   |
+| 07-jr,jp,call,ret,rst   | Pass   |
+| 08-misc instrs          | Pass   |
+| 09-op r,r               | Pass   |
+| 10-bit ops              | Pass   |
+| 11-op a,(hl)            | Pass   |
+
 
 ## Getting Started
 
@@ -41,12 +60,6 @@ The project can be compiled into a standalone JAR using the [Shadow](https://plu
 ```
 
 The output `amber-gb.jar` will be located in app/build/libs directory.
-
-## Features
-
-- CPU: 491 of 512 opcodes implemented, each covered by unit tests.
-- MMU: 64KB memory map, ROM loading from disk, Serial port callback for Blargg's test output.
-- Display: early-stage Swing window.
 
 ## Resources
 
