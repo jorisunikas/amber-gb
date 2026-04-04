@@ -72,4 +72,12 @@ public class OpcodeLoad16Test extends OpcodeTestBase {
         assertThat(mmu.readByte(0x0110)).isEqualTo(0x34);
         assertThat(mmu.readByte(0x0111)).isEqualTo(0x12);
     }
+
+    @Test
+    void test_ld_sp_hl() {
+        reg.setHL(0x1234);
+        mmu.writeByte(0x0000, 0xF9);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getSP()).isEqualTo(0x1234);
+    }
 }

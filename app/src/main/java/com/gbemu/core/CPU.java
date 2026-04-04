@@ -329,7 +329,7 @@ public class CPU {
         opcodes[0xF6] = this::or_u8;
         opcodes[0xF7] = this::rst_6;
         opcodes[0xF8] = this::ld_hl_sp_plus_s8;
-        // F9
+        opcodes[0xF9] = this::ld_sp_hl;
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
         opcodes[0xFC] = () -> {
@@ -1100,6 +1100,11 @@ public class CPU {
     private void ld_rr_u16_helper(IntConsumer setter) {
         setter.accept(get_u16());
         cycles = 12;
+    }
+
+    private void ld_sp_hl() {
+        reg.setSP(reg.getHL());
+        cycles = 8;
     }
 
     /* LDH */
