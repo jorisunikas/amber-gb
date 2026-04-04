@@ -1,4 +1,4 @@
-package com.gbemu.core;
+package com.gbemu.core.memory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

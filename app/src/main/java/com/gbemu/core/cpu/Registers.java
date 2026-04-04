@@ -1,4 +1,4 @@
-package com.gbemu.core;
+package com.gbemu.core.cpu;
 
 public class Registers {
     private int a, b, c, d, e, h, l;

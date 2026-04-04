@@ -1,7 +1,9 @@
-package com.gbemu.core;
+package com.gbemu.core.cpu;
 
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
+
+import com.gbemu.core.memory.MMU;
 
 public class CPU {
     private final Registers reg;

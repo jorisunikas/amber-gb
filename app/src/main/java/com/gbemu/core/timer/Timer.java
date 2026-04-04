@@ -1,6 +1,6 @@
 package com.gbemu.core.timer;
 
-import com.gbemu.core.MMU;
+import com.gbemu.core.memory.MMU;
 
 public class Timer {
     private final MMU mmu;

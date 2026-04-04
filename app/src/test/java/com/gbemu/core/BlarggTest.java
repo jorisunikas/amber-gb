@@ -3,11 +3,14 @@ package com.gbemu.core;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import com.gbemu.core.timer.Timer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+
+import com.gbemu.core.cpu.CPU;
+import com.gbemu.core.memory.MMU;
+import com.gbemu.core.timer.Timer;
 
 public class BlarggTest {
     private static final long MAX_STEPS = 500_000_000;

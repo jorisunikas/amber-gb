@@ -1,10 +1,6 @@
 package com.gbemu.core;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.security.spec.ECParameterSpec;
-import java.util.function.IntConsumer;
 
 import org.junit.jupiter.api.Test;
 

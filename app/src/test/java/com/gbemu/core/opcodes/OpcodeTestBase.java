@@ -1,4 +1,8 @@
-package com.gbemu.core;
+package com.gbemu.core.opcodes;
+
+import com.gbemu.core.cpu.CPU;
+import com.gbemu.core.cpu.Registers;
+import com.gbemu.core.memory.MMU;
 
 import org.junit.jupiter.api.BeforeEach;
 
@@ -12,7 +16,6 @@ public abstract class OpcodeTestBase {
         mmu = new MMU();
         reg = new Registers();
         cpu = new CPU(mmu, reg);
-        // ignores startup-sequence, refactor later
         reg.setPC(0x0000);
     }
 }

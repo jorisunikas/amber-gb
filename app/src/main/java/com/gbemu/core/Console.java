@@ -2,6 +2,8 @@ package com.gbemu.core;
 
 import com.gbemu.display.Display;
 import com.gbemu.core.timer.Timer;
+import com.gbemu.core.cpu.CPU;
+import com.gbemu.core.memory.MMU;
 
 public class Console {
     private Display display;

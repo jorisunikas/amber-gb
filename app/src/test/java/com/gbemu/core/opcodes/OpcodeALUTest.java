@@ -1,13 +1,10 @@
-package com.gbemu.core;
+package com.gbemu.core.opcodes;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import static org.assertj.core.api.Assertions.assertThat;
-import java.beans.Transient;
 import java.util.function.IntConsumer;
 
 public class OpcodeALUTest extends OpcodeTestBase {
-
     /* XOR */
 
     @Test
