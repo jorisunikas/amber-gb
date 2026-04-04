@@ -279,7 +279,7 @@ public class CPU {
         opcodes[0xD6] = this::sub_u8;
         opcodes[0xD7] = this::rst_2;
         opcodes[0xD8] = this::ret_c;
-        // D9
+        opcodes[0xD9] = this::reti;
         opcodes[0xDA] = this::jp_c_u16;
         opcodes[0xDB] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xDB");
@@ -328,6 +328,8 @@ public class CPU {
         opcodes[0xF5] = this::push_af;
         opcodes[0xF6] = this::or_u8;
         opcodes[0xF7] = this::rst_6;
+        // F8
+        // F9
         opcodes[0xFA] = this::ld_a_u16ptr;
         opcodes[0xFB] = this::ei;
         opcodes[0xFC] = () -> {
@@ -1379,6 +1381,11 @@ public class CPU {
 
         reg.setPC(high << 8 | low);
         cycles = 16;
+    }
+
+    private void reti() {
+        ret();
+        ime = true;
     }
 
     /* JR s8 */

@@ -388,4 +388,15 @@ public class OpcodeJumpTest extends OpcodeTestBase {
             assertThat(reg.getPC()).isEqualTo(expectedPC[i]);
         }
     }
+
+    @Test
+    void test_reti() {
+        reg.setSP(0xFFFC);
+        mmu.writeByte(0xFFFC, 0x50);
+        mmu.writeByte(0xFFFD, 0x01);
+        mmu.writeByte(0x0000, 0xD9);
+        assertThat(cpu.step()).as("ret cycles = 16").isEqualTo(16);
+        assertThat(reg.getPC()).isEqualTo(0x0150);
+        assertThat(reg.getSP()).isEqualTo(0xFFFE);
+    }
 }
