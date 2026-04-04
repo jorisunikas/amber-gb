@@ -10,6 +10,7 @@ public class CPU {
     private final Runnable[] opcodes;
     private boolean halted;
     private boolean ime;
+    private boolean pendingIme;
 
     public CPU(MMU mmu) {
         this(mmu, new Registers());
@@ -23,10 +24,12 @@ public class CPU {
         cycles = 0;
         halted = false;
         ime = false;
+        pendingIme = false;
         initOpcodes();
     }
 
     public int step() {
+        handleInterrupts();
         if (halted)
             return 4;
 
@@ -37,6 +40,12 @@ public class CPU {
                     "Unrecognised opcode: 0x" + Integer.toHexString(opcode).toUpperCase());
 
         handler.run();
+
+        if (pendingIme) {
+            ime = true;
+            pendingIme = false;
+        }
+
         return cycles;
     }
 
@@ -44,6 +53,30 @@ public class CPU {
         int opcode = mmu.readByte(reg.getPC());
         reg.incPC();
         return opcode;
+    }
+
+    private void handleInterrupts() {
+        /* check IME && (IF & IE) != 0; return from halted */
+        int pending = (mmu.readByte(0xFFFF) & 0x1F) & (mmu.readByte(0xFF0F) & 0x1F);
+        if (pending != 0 && halted)
+            halted = false;
+
+        if (!ime || pending == 0)
+            return;
+
+        /* 1: reset bit in IF, IME */
+        ime = false;
+        int bit = Integer.numberOfTrailingZeros(pending);
+        mmu.writeByte(0xFF0F, mmu.readByte(0xFF0F) & ~(1 << bit));
+
+        /* 2: push PC, call <interrupt address> */
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), ((reg.getPC()) >> 8) & 0xFF);
+        reg.decSP();
+        mmu.writeByte(reg.getSP(), reg.getPC() & 0xFF);
+
+        reg.setPC(0x0040 + bit * 8);
+        cycles = 20;
     }
 
     private void initOpcodes() {
@@ -986,6 +1019,7 @@ public class CPU {
 
     private void and_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) & reg.getA());
+        reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);
         reg.setFlagH(true);
         cycles = 8;
@@ -1020,6 +1054,7 @@ public class CPU {
 
     private void or_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) | reg.getA());
+        reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);
         cycles = 8;
     }
@@ -1052,6 +1087,7 @@ public class CPU {
 
     private void xor_hlptr() {
         reg.setA((mmu.readByte(reg.getHL()) & 0xFF) ^ reg.getA());
+        reg.setF(0x00);
         reg.setFlagZ(reg.getA() == 0);
         cycles = 8;
     }
@@ -1131,7 +1167,7 @@ public class CPU {
 
     /* LD */
 
-    private void ld_hl_sp_plus_s8(){
+    private void ld_hl_sp_plus_s8() {
         int value = (byte) fetch();
         int result = value + reg.getSP();
         reg.setFlagZ(false);
@@ -1187,12 +1223,32 @@ public class CPU {
         cycles = 16;
     }
 
-    // @formatter:off
-    private void stop() {fetch(); halted = true; cycles = 4;}
-    private void halt() { halted = true; cycles = 4; }
-    private void di() { ime = false; cycles = 4; }
-    private void ei() { ime = true; cycles = 4; }
-    // @formatter:on
+    private void stop() {
+        fetch();
+        halted = true;
+        cycles = 4;
+    }
+
+    private void halt() {
+        /* halt bug */
+        int pending = (mmu.readByte(0xFFFF) & 0x1F) & (mmu.readByte(0xFF0F) & 0x1F);
+        if (!ime && pending != 0)
+            return;
+
+        /* normal control flow */
+        halted = true;
+        cycles = 4;
+    }
+
+    private void di() {
+        ime = false;
+        cycles = 4;
+    }
+
+    private void ei() {
+        pendingIme = true;
+        cycles = 4;
+    }
 
     /* LD (HL), r */
 
@@ -1405,6 +1461,7 @@ public class CPU {
     private void ret_flag_helper(boolean flag) {
         if (flag) {
             ret();
+            cycles = 20;
             return;
         }
         cycles = 8;
