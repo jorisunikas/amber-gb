@@ -25,6 +25,12 @@ public class MMU {
 
         checkSerialCallback(adress, value);
 
+        /* reset DIV register */
+        if(adress == 0xFF04){
+            memory[adress] = 0;
+            return;
+        }
+
         memory[adress] = value;
     }
 
