@@ -303,7 +303,7 @@ public class CPU {
         opcodes[0xE5] = this::push_hl;
         opcodes[0xE6] = this::and_u8;
         opcodes[0xE7] = this::rst_4;
-        // E8
+        opcodes[0xE8] = this::add_sp_s8;
         // E9
         opcodes[0xEA] = this::ld_u16ptr_a;
         opcodes[0xEB] = () -> {
@@ -919,6 +919,17 @@ public class CPU {
         reg.setFlagH(((value & 0xFFF) + (reg.getHL() & 0xFFF)) > 0xFFF);
         reg.setHL(result);
         cycles = 8;
+    }
+
+    private void add_sp_s8() {
+        int value = (byte) fetch();
+        int result = value + reg.getSP();
+        reg.setFlagZ(false);
+        reg.setFlagN(false);
+        reg.setFlagH(((value & 0xF) + (reg.getSP() & 0xF)) > 0xF);
+        reg.setFlagC(((value & 0xFF) + (reg.getSP() & 0xFF)) > 0xFF);
+        reg.setSP(result);
+        cycles = 16;
     }
 
     /* CP */

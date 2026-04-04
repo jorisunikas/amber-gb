@@ -1612,7 +1612,7 @@ public class OpcodeALUTest extends OpcodeTestBase {
         int[] opcodes = { 0x09, 0x19, 0x29, 0x39 };
         IntConsumer[] setters = { reg::setBC, reg::setDE, reg::setHL, reg::setSP };
 
-        for(int i = 0; i < opcodes.length; i++) {
+        for (int i = 0; i < opcodes.length; i++) {
             reg.setPC(0x0000);
             setters[i].accept(0x0001);
             reg.setHL(0x0001);
@@ -1672,6 +1672,28 @@ public class OpcodeALUTest extends OpcodeTestBase {
             assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
             assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
             assertThat(reg.isFlagN()).isTrue();
+        }
+    }
+
+    @Test
+    void add_sp_s8() {
+        int[] input = {0x00, 0x0F, 0x01};
+        int[] inputSP = {0x00, 0x0F, 0xFF};
+        int[] expected = {0, 0x1E, 0x0100};
+        boolean[] expectedFlagH = {false, true, true};
+        boolean[] expectedFlagC = {false, false, true};
+
+        for (int i = 0; i < input.length; i++) {
+            reg.setPC(0x0000);
+            reg.setSP(inputSP[i]);
+            mmu.writeByte(0x0000, 0xE8);
+            mmu.writeByte(0x0001, input[i]);
+            assertThat(cpu.step()).isEqualTo(16);
+            assertThat(reg.getSP()).isEqualTo(expected[i]);
+            assertThat(reg.isFlagZ()).isFalse();
+            assertThat(reg.isFlagN()).isFalse();
+            assertThat(reg.isFlagH()).isEqualTo(expectedFlagH[i]);
+            assertThat(reg.isFlagC()).isEqualTo(expectedFlagC[i]);
         }
     }
 }
