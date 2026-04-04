@@ -399,4 +399,12 @@ public class OpcodeJumpTest extends OpcodeTestBase {
         assertThat(reg.getPC()).isEqualTo(0x0150);
         assertThat(reg.getSP()).isEqualTo(0xFFFE);
     }
+
+    @Test
+    void test_jp_hl(){
+        reg.setHL(0x0100);
+        mmu.writeByte(0x0000, 0xE9);
+        assertThat(cpu.step()).isEqualTo(4);
+        assertThat(reg.getPC()).isEqualTo(0x0100);
+    }
 }

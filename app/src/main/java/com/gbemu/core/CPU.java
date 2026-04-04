@@ -304,7 +304,7 @@ public class CPU {
         opcodes[0xE6] = this::and_u8;
         opcodes[0xE7] = this::rst_4;
         opcodes[0xE8] = this::add_sp_s8;
-        // E9
+        opcodes[0xE9] = this::jp_hl;
         opcodes[0xEA] = this::ld_u16ptr_a;
         opcodes[0xEB] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xEB");
@@ -1466,5 +1466,10 @@ public class CPU {
     private void jp_u16() {
         reg.setPC(get_u16());
         cycles = 16;
+    }
+
+    private void jp_hl() {
+        reg.setPC(reg.getHL());
+        cycles = 4;
     }
 }
