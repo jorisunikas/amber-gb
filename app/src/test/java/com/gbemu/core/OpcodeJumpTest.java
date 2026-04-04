@@ -39,7 +39,7 @@ public class OpcodeJumpTest extends OpcodeTestBase {
         mmu.writeByte(0xFFFC, 0x50);
         mmu.writeByte(0xFFFD, 0x01);
         mmu.writeByte(0x0000, 0xC0);
-        assertThat(cpu.step()).as("ret nz cycles = 16").isEqualTo(16);
+        assertThat(cpu.step()).as("ret nz cycles = 16").isEqualTo(20);
         assertThat(reg.getPC()).isEqualTo(0x0150);
         assertThat(reg.getSP()).isEqualTo(0xFFFE);
     }
@@ -63,7 +63,7 @@ public class OpcodeJumpTest extends OpcodeTestBase {
         mmu.writeByte(0xFFFC, 0x50);
         mmu.writeByte(0xFFFD, 0x01);
         mmu.writeByte(0x0000, 0xC8);
-        assertThat(cpu.step()).as("ret z cycles = 16").isEqualTo(16);
+        assertThat(cpu.step()).as("ret z cycles = 16").isEqualTo(20);
         assertThat(reg.getPC()).isEqualTo(0x0150);
         assertThat(reg.getSP()).isEqualTo(0xFFFE);
     }
@@ -87,7 +87,7 @@ public class OpcodeJumpTest extends OpcodeTestBase {
         mmu.writeByte(0xFFFC, 0x50);
         mmu.writeByte(0xFFFD, 0x01);
         mmu.writeByte(0x0000, 0xD0);
-        assertThat(cpu.step()).as("ret nc cycles = 16").isEqualTo(16);
+        assertThat(cpu.step()).as("ret nc cycles = 16").isEqualTo(20);
         assertThat(reg.getPC()).isEqualTo(0x0150);
         assertThat(reg.getSP()).isEqualTo(0xFFFE);
     }
@@ -111,7 +111,7 @@ public class OpcodeJumpTest extends OpcodeTestBase {
         mmu.writeByte(0xFFFC, 0x50);
         mmu.writeByte(0xFFFD, 0x01);
         mmu.writeByte(0x0000, 0xD8);
-        assertThat(cpu.step()).as("ret c cycles = 16").isEqualTo(16);
+        assertThat(cpu.step()).as("ret c cycles = 16").isEqualTo(20);
         assertThat(reg.getPC()).isEqualTo(0x0150);
         assertThat(reg.getSP()).isEqualTo(0xFFFE);
     }
