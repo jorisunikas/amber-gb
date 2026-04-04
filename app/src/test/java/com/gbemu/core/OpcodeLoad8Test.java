@@ -687,4 +687,24 @@ public class OpcodeLoad8Test extends OpcodeTestBase {
             assertThat(reg.getA()).isEqualTo(0x12);
         }
     }
+
+    @Test
+    void ldh_cptr_a(){
+        reg.setC(0x12);
+        reg.setA(0x34);
+        mmu.writeByte(0x0000, 0xE2);
+        mmu.writeByte(0xFF12, 0x00);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(mmu.readByte(0xFF12)).isEqualTo(0x34);
+    }
+
+    @Test
+    void ldh_a_cptr(){
+        reg.setC(0x12);
+        reg.setA(0x00);
+        mmu.writeByte(0x0000, 0xF2);
+        mmu.writeByte(0xFF12, 0x34);
+        assertThat(cpu.step()).isEqualTo(8);
+        assertThat(reg.getA()).isEqualTo(0x34);
+    }
 }

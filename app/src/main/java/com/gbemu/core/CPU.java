@@ -293,7 +293,7 @@ public class CPU {
 
         opcodes[0xE0] = this::ldh_u8ptr_a;
         opcodes[0xE1] = this::pop_hl;
-        // E2
+        opcodes[0xE2] = this::ldh_cptr_a;
         opcodes[0xE3] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xE3");
         };
@@ -320,7 +320,7 @@ public class CPU {
 
         opcodes[0xF0] = this::ldh_a_u8ptr;
         opcodes[0xF1] = this::pop_af;
-        // F2
+        opcodes[0xF2] = this::ldh_a_cptr;
         opcodes[0xF3] = this::di;
         opcodes[0xF4] = () -> {
             throw new IllegalStateException("Illegal opcode: 0xF4");
@@ -1092,6 +1092,16 @@ public class CPU {
     }
 
     /* LDH */
+
+    private void ldh_cptr_a() {
+        mmu.writeByte((reg.getC() & 0xFF) | 0xFF00, reg.getA());
+        cycles = 8;
+    }
+
+    private void ldh_a_cptr() {
+        reg.setA(mmu.readByte((reg.getC() & 0xFF) | 0xFF00));
+        cycles = 8;
+    }
 
     private void ldh_u8ptr_a() {
         mmu.writeByte((fetch() & 0xFF) | 0xFF00, reg.getA());
