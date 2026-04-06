@@ -8,6 +8,7 @@ public class PPU {
     private int currentDots;
     private int LDLCValue;
     private int currentScanline;
+    private int windowLineCounter;
     private State currentState;
     private final int[] framebuffer;
 
@@ -21,6 +22,7 @@ public class PPU {
         framebuffer = new int[160 * 144];
         currentDots = 0;
         currentScanline = 0;
+        windowLineCounter = 0;
         LDLCValue = mmu.readByte(0xFF40);
         currentState = State.OAM_SCAN;
     }
@@ -44,8 +46,12 @@ public class PPU {
                 mmu.writeByte(0xFF0F, (mmu.readByte(0xFF0F) | 0x01));
             }
 
-            if (currentScanline > 153)
+            if (currentScanline > 153) {
                 currentScanline = 0;
+                windowLineCounter = 0;
+            }
+
+            checkLYC();
         }
 
         if (currentScanline < 144) {
@@ -96,6 +102,7 @@ public class PPU {
             return;
         }
 
+        boolean hasWindowInc = false;
         boolean bit4 = getLDLCBit(4);
 
         /* Calculates base values for indexing Tilemaps and Tiles themselves */
@@ -112,13 +119,18 @@ public class PPU {
             boolean windowVisible = i >= (getWX() - 7) && currentScanline >= getWY() && getLDLCBit(5);
             if (windowVisible) {
                 int windowX = i - (getWX() - 7);
-                int windowY = currentScanline - getWY();
+                /* Window cannot rely on scanline count, it needs it's own counter */
+                int windowY = windowLineCounter;
                 drawPixel(tileMapBaseWindow, tileDataBase, bit4, i, windowX, windowY);
+                hasWindowInc = true;
                 continue;
             }
 
             drawPixel(tileMapBaseBackground, tileDataBase, bit4, i, screenX, screenY);
         }
+
+        if (hasWindowInc)
+            windowLineCounter++;
     }
 
     private void drawPixel(int tileMapBase, int tileDataBase, boolean bit4, int i, int pixelX, int pixelY) {
@@ -154,6 +166,24 @@ public class PPU {
         int color = (hBit << 1) | lBit;
         framebuffer[i + currentScanline * 160] = getRGBColor(color);
 
+    }
+
+    /**
+     * if LY == LYC, then STAT.2 = true;
+     * if STAT.2 == true and STAT.6 == true;
+     * requests LCD interrupt
+     */
+    private void checkLYC() {
+        int stat = mmu.readByte(0xFF41);
+        if (mmu.readByte(0xFF45) == currentScanline) {
+            stat |= 0x04;
+            if ((stat & 0x40) != 0) {
+                mmu.writeByte(0xFF0F, mmu.readByte(0xFF0F) | 0x02);
+            }
+        } else {
+            stat &= ~(0x04);
+        }
+        mmu.writeByte(0xFF41, stat);
     }
 
     private boolean getLDLCBit(int bit) {
