@@ -44,9 +44,10 @@ public class Console {
             }
 
             display.render(ppu.getFramebuffer());
+
             nextFrameTime += FRAME_DURATION_NS;
             long sleepNs = nextFrameTime - System.nanoTime();
-            if(sleepNs > 0){
+            if (sleepNs > 0) {
                 try {
                     Thread.sleep(sleepNs / 1_000_000, (int) (sleepNs % 1_000_000));
                 } catch (InterruptedException e) {

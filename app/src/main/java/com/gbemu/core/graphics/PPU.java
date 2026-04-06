@@ -84,6 +84,7 @@ public class PPU {
             case V_BLANK -> 1;
         };
 
+        /* Sets current PPU mode to the lower 2 bits of LDLC register */
         mmu.writeByte(0xFF41, (mmu.readByte(0xFF41) & 0xFC) | value);
     }
 
@@ -92,33 +93,44 @@ public class PPU {
             drawWhiteBackground();
             return;
         }
-        int bit3 = (LDLCValue >> 3) & 0x1;
-        int bit4 = (LDLCValue >> 4) & 0x1;
-        int tileMapBase = bit3 == 1 ? 0x9C00 : 0x9800;
-        int tileDataBase = bit4 == 1 ? 0x8000 : 0x9000;
+        boolean bit4 = ((LDLCValue >> 4) & 0x1) == 1;
+
+        /* Calculates base values for indexing TileMaps and Tiles themselves */
+        int tileMapBase = ((LDLCValue >> 3) & 0x1) == 1 ? 0x9C00 : 0x9800;
+        int tileDataBase = bit4 ? 0x8000 : 0x9000;
+
+        /* ... & 0xFF - Accounts for background wrapping */
+        int pixelY = (getSCY() + currentScanline) & 0xFF;
+        int tileY = pixelY / 8;
+        int tilePixelY = pixelY % 8;
+
         for (int i = 0; i < 160; i++) {
+            /* ... & 0xFF - Accounts for background wrapping */
             int pixelX = (getSCX() + i) & 0xFF;
-            int pixelY = (getSCY() + currentScanline) & 0xFF;
-
             int tileX = pixelX / 8;
-            int tileY = pixelY / 8;
-
             int tilePixelX = pixelX % 8;
-            int tilePixelY = pixelY % 8;
 
+            /* Indexes Tile Map which contains a reference to a specific tile in VRAM */
             int tileMapAddress = tileMapBase + (tileY * 32) + tileX;
             int tileDataIndex = mmu.readByte(tileMapAddress);
 
-            int tileDataAdress;
-            if (bit4 == 1) {
-                tileDataAdress = tileDataBase + tileDataIndex * 16;
-            } else {
-                tileDataAdress = tileDataBase + ((byte) tileDataIndex) * 16;
-            }
+            /*
+             * Accounts for different indexing types:
+             * bit4 = 1: unsigned offset from 0x8000
+             * bit4 = 0: signed offset from 0x9000
+             */
+            int tileDataAdress = tileDataBase + 16 *
+                    (bit4 ? tileDataIndex : ((byte) tileDataIndex));
 
+            /* Parses tile data for individual pixel bits */
             int lowerByte = mmu.readByte(tileDataAdress + 2 * tilePixelY);
             int higherByte = mmu.readByte(tileDataAdress + 2 * tilePixelY + 1);
 
+            /*
+             * Each row contains 2 bytes. Lower byte contains the lower bit,
+             * higher byte contains the higher bit. Bit7 - leftmost pixel;
+             * bit0 - rightmost pixel
+             */
             int hBit = (higherByte >> (7 - tilePixelX)) & 0x01;
             int lBit = (lowerByte >> (7 - tilePixelX)) & 0x01;
 
@@ -145,7 +157,7 @@ public class PPU {
         };
     }
 
-    private void setPPUOff(){
+    private void setPPUOff() {
         currentState = State.H_BLANK;
         currentScanline = 0;
         currentDots = 0;
