@@ -23,15 +23,20 @@ public class Display extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(screen, getWidth(), getHeight(), null);
+        g.drawImage(screen, 0, 0, null);
     }
 
-    public void setPixel(int x, int y, int color) {
-        screen.setRGB(x, y, color);
-    }
-
-    public void refresh() {
+    public void render(int[] frameBuffer) {
+        for (int i = 0; i < GB_HEIGHT; i++) {
+            for (int j = 0; j < GB_WIDTH; j++) {
+                int color = frameBuffer[j + i * GB_WIDTH];
+                for (int si = 0; si < SCALE; si++) {
+                    for (int sj = 0; sj < SCALE; sj++) {
+                        screen.setRGB(j * SCALE + sj, i * SCALE + si, color);
+                    }
+                }
+            }
+        }
         repaint();
     }
-
 }
