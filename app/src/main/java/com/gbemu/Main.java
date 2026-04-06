@@ -9,8 +9,8 @@ import com.gbemu.core.Console;
 
 public class Main {
     public static void main(String[] args) {
+        Console console = new Console();
         SwingUtilities.invokeLater(() -> {
-            Console console = new Console();
 
             JFrame frame = new JFrame("GameBoy Emulator");
             frame.addWindowListener(new WindowAdapter() {
@@ -23,6 +23,8 @@ public class Main {
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         });
+        new Thread(console::run).start();
     }
 }
