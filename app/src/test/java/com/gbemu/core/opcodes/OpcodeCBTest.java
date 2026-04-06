@@ -1,4 +1,4 @@
-package com.gbemu.core;
+package com.gbemu.core.opcodes;
 
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;

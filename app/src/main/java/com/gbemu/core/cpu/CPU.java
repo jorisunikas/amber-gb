@@ -8,8 +8,10 @@ import com.gbemu.core.memory.MMU;
 public class CPU {
     private final Registers reg;
     private final MMU mmu;
+
     private int cycles;
     private final Runnable[] opcodes;
+
     private boolean halted;
     private boolean ime;
     private boolean pendingIme;
