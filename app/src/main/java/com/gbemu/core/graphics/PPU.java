@@ -1,5 +1,8 @@
 package com.gbemu.core.graphics;
 
+import java.net.CookieHandler;
+import java.util.BitSet;
+
 import com.gbemu.core.memory.MMU;
 
 public class PPU {
@@ -9,6 +12,7 @@ public class PPU {
     private int LDLCValue;
     private int currentScanline;
     private int windowLineCounter;
+    private Sprite[] currentSprites;
     private State currentState;
     private final int[] framebuffer;
 
@@ -24,6 +28,7 @@ public class PPU {
         currentScanline = 0;
         windowLineCounter = 0;
         LDLCValue = mmu.readByte(0xFF40);
+        currentSprites = new Sprite[10];
         currentState = State.OAM_SCAN;
     }
 
@@ -58,6 +63,8 @@ public class PPU {
             if (currentDots < 80) {
                 currentState = State.OAM_SCAN;
             } else if (currentDots < 252) {
+                if (currentState == State.OAM_SCAN)
+                    currentSprites = readSprites();
                 currentState = State.DRAW;
             } else {
                 if (currentState == State.DRAW)
@@ -115,25 +122,34 @@ public class PPU {
 
         for (int i = 0; i < 160; i++) {
             int screenX = (getSCX() + i) & 0xFF;
+            boolean isWindowVisible = i >= (getWX() - 7) && currentScanline >= getWY() && getLDLCBit(5);
 
-            boolean windowVisible = i >= (getWX() - 7) && currentScanline >= getWY() && getLDLCBit(5);
-            if (windowVisible) {
+            if (isExistingSpriteHigh(i, currentScanline)) {
+                continue;
+            }
+            if (isWindowVisible) {
                 int windowX = i - (getWX() - 7);
                 /* Window cannot rely on scanline count, it needs it's own counter */
                 int windowY = windowLineCounter;
-                drawPixel(tileMapBaseWindow, tileDataBase, bit4, i, windowX, windowY);
+                framebuffer[i + currentScanline * 160] = getRGBColor(
+                        getPixelValue(tileMapBaseWindow, tileDataBase, bit4, i, windowX, windowY));
                 hasWindowInc = true;
                 continue;
             }
 
-            drawPixel(tileMapBaseBackground, tileDataBase, bit4, i, screenX, screenY);
+            int pixelValue = getPixelValue(tileMapBaseBackground, tileDataBase, bit4, i, screenX, screenY);
+            if (!isExistingSpriteLow(i, currentScanline)) {
+                framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
+            } else {
+                continue;
+            }
         }
 
         if (hasWindowInc)
             windowLineCounter++;
     }
 
-    private void drawPixel(int tileMapBase, int tileDataBase, boolean bit4, int i, int pixelX, int pixelY) {
+    private int getPixelValue(int tileMapBase, int tileDataBase, boolean bit4, int i, int pixelX, int pixelY) {
         int tileX = pixelX / 8;
         int tileY = pixelY / 8;
         int tilePixelX = pixelX % 8;
@@ -156,7 +172,7 @@ public class PPU {
         int higherByte = mmu.readByte(tileDataAdress + 2 * tilePixelY + 1);
 
         /*
-         * Each row contains 2 bytes. Lower byte contains the lower bit,
+         * Each rowInSprite contains 2 bytes. Lower byte contains the lower bit,
          * higher byte contains the higher bit. Bit7 - leftmost pixel;
          * bit0 - rightmost pixel
          */
@@ -164,8 +180,33 @@ public class PPU {
         int lBit = (lowerByte >> (7 - tilePixelX)) & 0x01;
 
         int color = (hBit << 1) | lBit;
-        framebuffer[i + currentScanline * 160] = getRGBColor(color);
+        return color;
 
+    }
+
+    private boolean isExistingSpriteHigh(int screenX, int screenY) {
+        int value = indexOfExistingSprite(screenX, screenY);
+        if (value == -1)
+            return false;
+        return currentSprites[value].hasPriority();
+    }
+
+    private boolean isExistingSpriteLow(int screenX, int screenY) {
+        int value = indexOfExistingSprite(screenX, screenY);
+        if (value == -1)
+            return false;
+        return !currentSprites[value].hasPriority();
+    }
+
+    private int indexOfExistingSprite(int screenX, int screenY) {
+        for (int i = 0; i < currentSprites.length; i++) {
+            Sprite s = currentSprites[i];
+            if (s == null)
+                break;
+            if ((s.x - 8) <= screenX && s.x > screenX)
+                return i;
+        }
+        return -1;
     }
 
     /**
@@ -186,6 +227,24 @@ public class PPU {
         mmu.writeByte(0xFF41, stat);
     }
 
+    private Sprite[] readSprites() {
+        Sprite[] sprites = new Sprite[10];
+        int height = getLDLCBit(2) ? 16 : 8;
+        int count = 0;
+        for (int i = 0; i < 40 && count < 10; i++) {
+            int address = 0xFE00 + i * 4;
+            int spriteY = mmu.readByte(address) - 16;
+            if (currentScanline >= spriteY && currentScanline < spriteY + height) {
+                sprites[count++] = (new Sprite(
+                        mmu.readByte(address),
+                        mmu.readByte(address + 1),
+                        mmu.readByte(address + 2),
+                        mmu.readByte(address + 3)));
+            }
+        }
+        return sprites;
+    }
+
     private boolean getLDLCBit(int bit) {
         return ((LDLCValue >> bit) & 0x1) == 1;
     }
@@ -194,6 +253,18 @@ public class PPU {
         for (int i = 0; i < 160; i++) {
             framebuffer[i + currentScanline * 160] = 0xFFFFFF;
         }
+    }
+
+    private int getRGBColorPallete(int bitValue, int paletteOffset) {
+        int palette = mmu.readByte(0xFF48 + paletteOffset);
+        int shade = (palette >> 2 * bitValue) & 0x03;
+        return switch (shade) {
+            case 0 -> 0xFFFFFF;
+            case 1 -> 0xAAAAAA;
+            case 2 -> 0x555555;
+            case 3 -> 0x000000;
+            default -> 0xFFFFFF;
+        };
     }
 
     private int getRGBColor(int bitValue) {
