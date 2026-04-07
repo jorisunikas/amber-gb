@@ -114,9 +114,15 @@ public class SpriteContainer {
         if (s.isFlipX())
             pixelXInTile = 7 - pixelXInTile;
 
+        /* extracts current pixel bytes from 16 tile bytes */
         int lowerByte = mmu.readByte(address + 2 * pixelYInTile);
         int higherByte = mmu.readByte(address + 2 * pixelYInTile + 1);
 
+        /*
+         * Each rowInSprite contains 2 bytes. Lower byte contains the lower bit,
+         * higher byte contains the higher bit. Bit7 - leftmost pixel;
+         * bit0 - rightmost pixel
+         */
         int hBit = (higherByte >> (7 - pixelXInTile)) & 0x01;
         int lBit = (lowerByte >> (7 - pixelXInTile)) & 0x01;
 

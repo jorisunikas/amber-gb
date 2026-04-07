@@ -6,7 +6,7 @@ public class PPU {
     private MMU mmu;
 
     private int currentDots;
-    private int LDLCValue;
+    private int LCDCValue;
     private int currentScanline;
     private int windowLineCounter;
     private SpriteContainer sprites;
@@ -24,16 +24,16 @@ public class PPU {
         currentDots = 0;
         currentScanline = 0;
         windowLineCounter = 0;
-        LDLCValue = mmu.readByte(0xFF40);
+        LCDCValue = mmu.readByte(0xFF40);
         currentState = State.OAM_SCAN;
         sprites = new SpriteContainer(mmu);
     }
 
     public void step(int cycles) {
-        LDLCValue = mmu.readByte(0xFF40);
+        LCDCValue = mmu.readByte(0xFF40);
 
         /* LDLC.7 == 0; PPU turns off */
-        if ((LDLCValue & 0x80) == 0) {
+        if ((LCDCValue & 0x80) == 0) {
             setPPUOff();
             return;
         }
@@ -66,7 +66,7 @@ public class PPU {
                 currentState = State.DRAW;
             } else {
                 if (currentState == State.DRAW)
-                    drawScanline(LDLCValue);
+                    drawScanline(LCDCValue);
                 currentState = State.H_BLANK;
             }
         } else {
@@ -97,58 +97,73 @@ public class PPU {
             case V_BLANK -> 1;
         };
 
-        /* Sets current PPU mode to the lower 2 bits of LDLC register */
+        /* Sets current PPU mode to the lower 2 bits of LCD Status register */
         mmu.writeByte(0xFF41, (mmu.readByte(0xFF41) & 0xFC) | value);
     }
 
-    private void drawScanline(int LDLCValue) {
-        if ((LDLCValue & 0x01) == 0) {
+    /**
+     * Renders a single scanline to the framebuffer.
+     * Rendering order (front to back):
+     * 1. High priority sprites (bit7=0)
+     * 2. Window
+     * 3. Background
+     * 4. Low priority sprites (bit7=1) only visible if Window or Background
+     * pixel index=0
+     *
+     * @param current LCDC (0xFF40) value
+     */
+    private void drawScanline(int LCDCValue) {
+        if ((LCDCValue & 0x01) == 0) {
             drawWhiteBackground();
             return;
         }
 
         boolean hasWindowInc = false;
-        boolean bit4 = getLDLCBit(4);
+        boolean bit4 = getLCDCBit(4);
 
-        /* Calculates base values for indexing Tilemaps and Tiles themselves */
-        int tileMapBaseBackground = getLDLCBit(3) ? 0x9C00 : 0x9800;
-        int tileMapBaseWindow = getLDLCBit(6) ? 0x9C00 : 0x9800;
+        int tileMapBaseBackground = getLCDCBit(3) ? 0x9C00 : 0x9800;
+        int tileMapBaseWindow = getLCDCBit(6) ? 0x9C00 : 0x9800;
         int tileDataBase = bit4 ? 0x8000 : 0x9000;
 
-        /* ... & 0xFF - Accounts for background wrapping */
+        /* Scrolled background Y - & 0xFF accounts for wrapping */
         int screenY = (getSCY() + currentScanline) & 0xFF;
 
         for (int i = 0; i < 160; i++) {
-            int screenX = (getSCX() + i) & 0xFF;
-            boolean isWindowVisible = i >= (getWX() - 7) && currentScanline >= getWY() && getLDLCBit(5);
 
-            /* Draw highest priority sprites */
+            /* Scrolled background X - & 0xFF accounts for wrapping */
+            int screenX = (getSCX() + i) & 0xFF;
+
+            /* Window starts at X = 0, when WX = 7 due to hardware */
+            boolean isWindowVisible = i >= (getWX() - 7)
+                    && currentScanline >= getWY()
+                    && getLCDCBit(5);
+
+            /* 1. High priority sprites */
             if (sprites.isSprite(i, true)) {
                 framebuffer[i + currentScanline * 160] = sprites.getEncodedPixel(i, true);
                 continue;
             }
-            /* If there is no sprite or it's tranparent draw window */
-            if (isWindowVisible) {
-                /* Window starts at X = 0, when WX = 7 due to hardware implementation */
-                int windowX = i - (getWX() - 7);
 
-                /* Window cannot rely on scanline count, it needs it's own counter */
-                int windowY = windowLineCounter;
-                int pixelValue = getPixelValue(tileMapBaseWindow, tileDataBase, bit4, i, windowX, windowY);
+            /* 2. Window layer */
+            if (isWindowVisible) {
+                int windowX = i - (getWX() - 7);
+                int pixelValue = getPixelValue(tileMapBaseWindow, tileDataBase, bit4, i, windowX, windowLineCounter);
                 framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
 
-                /* If there is a lowest priority sprite and window is equal to 0 */
+                /* 4. Low priority sprites, window color index = 0 */
                 if (sprites.isSprite(i, false) && pixelValue == 0) {
                     framebuffer[i + currentScanline * 160] = sprites.getEncodedPixel(i, false);
                 }
+
                 hasWindowInc = true;
                 continue;
             }
 
-            /* If there is no window, draw background */
+            /* 3. Background layer */
             int pixelValue = getPixelValue(tileMapBaseBackground, tileDataBase, bit4, i, screenX, screenY);
             framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
-            /* If there is a lowest priority sprite and background is equal to 0 */
+
+            /* 4. Low priority sprites, background color index = 0 */
             if (sprites.isSprite(i, false) && pixelValue == 0) {
                 framebuffer[i + currentScanline * 160] = sprites.getEncodedPixel(i, false);
             }
@@ -211,8 +226,8 @@ public class PPU {
         mmu.writeByte(0xFF41, stat);
     }
 
-    private boolean getLDLCBit(int bit) {
-        return ((LDLCValue >> bit) & 0x1) == 1;
+    private boolean getLCDCBit(int bit) {
+        return ((LCDCValue >> bit) & 0x1) == 1;
     }
 
     private void drawWhiteBackground() {
