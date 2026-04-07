@@ -15,23 +15,23 @@ public class MMU {
         serialCallback = null;
     }
 
-    public int readByte(int adress) {
-        return memory[adress & 0xFFFF];
+    public int readByte(int address) {
+        return memory[address & 0xFFFF];
     }
 
-    public void writeByte(int adress, int value) {
-        adress = adress & 0xFFFF;
+    public void writeByte(int address, int value) {
+        address = address & 0xFFFF;
         value = value & 0xFF;
 
-        checkSerialCallback(adress, value);
+        checkSerialCallback(address, value);
 
         /* reset DIV register */
-        if(adress == 0xFF04){
-            memory[adress] = 0;
+        if(address == 0xFF04){
+            memory[address] = 0;
             return;
         }
 
-        memory[adress] = value;
+        memory[address] = value;
     }
 
     public void loadROM(Path path) {
@@ -51,8 +51,8 @@ public class MMU {
         this.serialCallback = callback;
     }
 
-    private void checkSerialCallback(int adress, int value) {
-        if (adress == 0xFF02 && value == 0x81) {
+    private void checkSerialCallback(int address, int value) {
+        if (address == 0xFF02 && value == 0x81) {
             serialOutput.append((char) memory[0xFF01]);
             if (serialCallback != null) {
                 serialCallback.accept(memory[0xFF01]);
