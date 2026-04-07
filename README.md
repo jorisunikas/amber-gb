@@ -9,16 +9,20 @@ Working towards implementing the PPU (Pixel Processing Unit).
 ## Features
 
 - CPU: fully implemented instruction set (512 opcodes), functioning interrupt system.
+- PPU: functioning graphics system, able to draw image to display correctly.
 - MMU: 64KB memory map, ROM loading from disk.
 - Timer: fully implemented 4 registers, interrupt request upon overflow, integrated with CPU's interrupt system.
 - Display: early-stage Swing window.
 
 ## Testing
 
-All 11 individual [Blargg's CPU instruction](https://gbdev.gg8.se/wiki/articles/Test_ROMs) test ROMs pass:
+The PPU produces an accurate image for [dmg-acid2.gb](https://github.com/mattcurrie/dmg-acid2) test.
+
+All 11 individual [Blargg's CPU instruction](https://gbdev.gg8.se/wiki/articles/Test_ROMs) test ROMs pass.
 
 | Test                    | Result |
 |-------------------------|--------|
+| dmg-acid2.gb            | Pass   |
 | 01-special              | Pass   |
 | 02-interrupts           | Pass   |
 | 03-op sp,hl             | Pass   |
@@ -49,7 +53,7 @@ gradlew.bat run
 ```
 
 > [!NOTE]
-> At this point, running the emulator only opens a Swing window with an orange background.
+> At this point, user-friendly ROM loading is not yet implemented, ROM's location must be hard coded in the Main.java class.
 
 ### Building a JAR
 
