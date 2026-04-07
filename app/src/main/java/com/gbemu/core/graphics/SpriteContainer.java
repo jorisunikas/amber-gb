@@ -35,13 +35,16 @@ public class SpriteContainer {
     /**
      * Returns RGB encoded pixel of the highest priority sprite at location (x,
      * scanline).
-     * Returns 0 if no sprite exists at this location or the pixel is transparent.
+     * Returns 0 if sprites are disabled, no sprite exists at this location or the
+     * pixel is transparent.
      * 
      * @param x               screen X coordinate (0-159)
      * @param hasHighPriority true = sprite is drawn on top of background
-     * @return RGB color value, 0 if no pixel exists here
+     * @return RGB color value, 0 if no pixel exists here or sprites are disabled
      */
     public int getEncodedPixel(int x, boolean hasHighPriority) {
+        if (!areObjectsEnabled())
+            return 0;
         Sprite s = getSprite(x, hasHighPriority);
         if (s == null)
             return 0;
@@ -49,14 +52,17 @@ public class SpriteContainer {
     }
 
     /**
-     * Checks if a sprite exists at current location X.
-     * Returns false if no sprite exists or pixel is transparent.
+     * Checks if sprites are enabled and if a sprite exists at current location X.
+     * Returns false if sprites are disabled, no sprite exists or pixel is
+     * transparent.
      *
      * @param x               screen X coordinate (0-159)
      * @param hasHighPriority true = sprite is drawn on top of background
      * @return true = a non transparent sprite exists at this location
      */
     public boolean isSprite(int x, boolean hasHighPriority) {
+        if (!areObjectsEnabled())
+            return false;
         Sprite s = getSprite(x, hasHighPriority);
         if (s == null)
             return false;
@@ -121,6 +127,10 @@ public class SpriteContainer {
 
     private boolean getLDLCBit(int bit) {
         return ((LDLCValue >> bit) & 0x1) == 1;
+    }
+
+    private boolean areObjectsEnabled() {
+        return getLDLCBit(1);
     }
 
     private int encodePixel(int bitValue, int paletteOffset) {
