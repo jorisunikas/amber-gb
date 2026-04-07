@@ -109,7 +109,6 @@ public class PPU {
 
         boolean hasWindowInc = false;
         boolean bit4 = getLDLCBit(4);
-        boolean isObjectsEnabled = getLDLCBit(1);
 
         /* Calculates base values for indexing Tilemaps and Tiles themselves */
         int tileMapBaseBackground = getLDLCBit(3) ? 0x9C00 : 0x9800;
@@ -130,11 +129,18 @@ public class PPU {
             }
             /* If there is no sprite or it's tranparent draw window */
             if (isWindowVisible) {
+                /* Window starts at X = 0, when WX = 7 due to hardware implementation */
                 int windowX = i - (getWX() - 7);
+
                 /* Window cannot rely on scanline count, it needs it's own counter */
                 int windowY = windowLineCounter;
-                framebuffer[i + currentScanline * 160] = getRGBColor(
-                        getPixelValue(tileMapBaseWindow, tileDataBase, bit4, i, windowX, windowY));
+                int pixelValue = getPixelValue(tileMapBaseWindow, tileDataBase, bit4, i, windowX, windowY);
+                framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
+
+                /* If there is a lowest priority sprite and window is equal to 0 */
+                if (sprites.isSprite(i, false) && pixelValue == 0) {
+                    framebuffer[i + currentScanline * 160] = sprites.getEncodedPixel(i, false);
+                }
                 hasWindowInc = true;
                 continue;
             }
