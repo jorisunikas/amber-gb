@@ -125,7 +125,12 @@ public class PPU {
             boolean isWindowVisible = i >= (getWX() - 7) && currentScanline >= getWY() && getLDLCBit(5);
 
             if (isExistingSpriteHigh(i, currentScanline)) {
-                continue;
+                Sprite s = currentSprites[indexOfExistingSprite(i, currentScanline)];
+                int pixelValue = getSpritePixelValue(s, i);
+                if (pixelValue != 0) {
+                    framebuffer[i + currentScanline * 160] = getRGBColorPallete(pixelValue, s.getPalette());
+                    continue;
+                }
             }
             if (isWindowVisible) {
                 int windowX = i - (getWX() - 7);
@@ -141,7 +146,9 @@ public class PPU {
             if (!isExistingSpriteLow(i, currentScanline)) {
                 framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
             } else {
-                continue;
+                Sprite s = currentSprites[indexOfExistingSprite(i, currentScanline)];
+                pixelValue = getSpritePixelValue(s, i);
+                framebuffer[i + currentScanline * 160] = getRGBColorPallete(pixelValue, s.getPalette());
             }
         }
 
@@ -184,6 +191,24 @@ public class PPU {
 
     }
 
+    private int getSpritePixelValue(Sprite s, int pixel) {
+        int spriteRow = currentScanline - (s.y - 16);
+        int address = 0x8000
+                + 16 * (getLDLCBit(2) ? (spriteRow < 8 ? s.tileIndex & 0xFE : s.tileIndex | 0x01) : s.tileIndex);
+
+        int pixelYInTile = spriteRow % 8;
+        int pixelXInTile = (pixel - (s.x - 8)) % 8;
+
+        int lowerByte = mmu.readByte(address + 2 * pixelYInTile);
+        int higherByte = mmu.readByte(address + 2 * pixelYInTile + 1);
+
+        int hBit = (higherByte >> (7 - pixelXInTile)) & 0x01;
+        int lBit = (lowerByte >> (7 - pixelXInTile)) & 0x01;
+
+        int color = (hBit << 1) | lBit;
+        return color;
+    }
+
     private boolean isExistingSpriteHigh(int screenX, int screenY) {
         int value = indexOfExistingSprite(screenX, screenY);
         if (value == -1)
@@ -210,9 +235,9 @@ public class PPU {
     }
 
     /**
-     * if LY == LYC, then STAT.2 = true;
+     * if LY == LYC, then set STAT.2 = true;
      * if STAT.2 == true and STAT.6 == true;
-     * requests LCD interrupt
+     * request LCD interrupt
      */
     private void checkLYC() {
         int stat = mmu.readByte(0xFF41);
