@@ -3,6 +3,8 @@ package com.gbemu.core.graphics;
 import java.net.CookieHandler;
 import java.util.BitSet;
 
+import javax.swing.text.StyledEditorKit.BoldAction;
+
 import com.gbemu.core.memory.MMU;
 
 public class PPU {
@@ -111,6 +113,7 @@ public class PPU {
 
         boolean hasWindowInc = false;
         boolean bit4 = getLDLCBit(4);
+        boolean isObjectsEnabled = getLDLCBit(1);
 
         /* Calculates base values for indexing Tilemaps and Tiles themselves */
         int tileMapBaseBackground = getLDLCBit(3) ? 0x9C00 : 0x9800;
@@ -124,7 +127,7 @@ public class PPU {
             int screenX = (getSCX() + i) & 0xFF;
             boolean isWindowVisible = i >= (getWX() - 7) && currentScanline >= getWY() && getLDLCBit(5);
 
-            if (isExistingSpriteHigh(i, currentScanline)) {
+            if (isExistingSpriteHigh(i, currentScanline) && isObjectsEnabled) {
                 Sprite s = currentSprites[indexOfExistingSprite(i, currentScanline)];
                 int pixelValue = getSpritePixelValue(s, i);
                 if (pixelValue != 0) {
@@ -143,7 +146,7 @@ public class PPU {
             }
 
             int pixelValue = getPixelValue(tileMapBaseBackground, tileDataBase, bit4, i, screenX, screenY);
-            if (!isExistingSpriteLow(i, currentScanline)) {
+            if (!isExistingSpriteLow(i, currentScanline) || !isObjectsEnabled) {
                 framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
             } else {
                 Sprite s = currentSprites[indexOfExistingSprite(i, currentScanline)];

@@ -12,7 +12,7 @@ public class Sprite {
 
     /** {return} opposite of bit7 in attributes */
     public boolean hasPriority() {
-        return ((attributes >> 7) & 0x01) == 1;
+        return ((attributes >> 7) & 0x01) == 0;
     }
 
     public boolean isFlipX() {
