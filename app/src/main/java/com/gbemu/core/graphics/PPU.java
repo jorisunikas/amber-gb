@@ -1,10 +1,5 @@
 package com.gbemu.core.graphics;
 
-import java.net.CookieHandler;
-import java.util.BitSet;
-
-import javax.swing.text.StyledEditorKit.BoldAction;
-
 import com.gbemu.core.memory.MMU;
 
 public class PPU {
@@ -146,12 +141,12 @@ public class PPU {
             }
 
             int pixelValue = getPixelValue(tileMapBaseBackground, tileDataBase, bit4, i, screenX, screenY);
-            if (!isExistingSpriteLow(i, currentScanline) || !isObjectsEnabled) {
-                framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
-            } else {
+            framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
+            if (isExistingSpriteLow(i, currentScanline) && isObjectsEnabled && pixelValue == 0) {
                 Sprite s = currentSprites[indexOfExistingSprite(i, currentScanline)];
-                pixelValue = getSpritePixelValue(s, i);
-                framebuffer[i + currentScanline * 160] = getRGBColorPallete(pixelValue, s.getPalette());
+                int objectPixelValue = getSpritePixelValue(s, i);
+                if (objectPixelValue != 0)
+                    framebuffer[i + currentScanline * 160] = getRGBColorPallete(objectPixelValue, s.getPalette());
             }
         }
 
@@ -231,14 +226,18 @@ public class PPU {
     }
 
     private int indexOfExistingSprite(int screenX, int screenY) {
+        int lowestX = 1000;
+        int index = -1;
         for (int i = 0; i < currentSprites.length; i++) {
             Sprite s = currentSprites[i];
             if (s == null)
                 break;
-            if ((s.x - 8) <= screenX && s.x > screenX)
-                return i;
+            if ((s.x - 8) <= screenX && s.x > screenX && s.x < lowestX) {
+                index = i;
+                lowestX = s.x;
+            }
         }
-        return -1;
+        return index;
     }
 
     /**
@@ -283,7 +282,7 @@ public class PPU {
 
     private void drawWhiteBackground() {
         for (int i = 0; i < 160; i++) {
-            framebuffer[i + currentScanline * 160] = 0xFFFFFF;
+            framebuffer[i + currentScanline * 160] = getRGBColor(0);
         }
     }
 
