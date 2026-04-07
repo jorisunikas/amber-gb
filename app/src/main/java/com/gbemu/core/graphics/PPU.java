@@ -193,11 +193,15 @@ public class PPU {
 
     private int getSpritePixelValue(Sprite s, int pixel) {
         int spriteRow = currentScanline - (s.y - 16);
+        if (s.isFlipY())
+            spriteRow = (getLDLCBit(2) ? 16 : 8) - spriteRow - 1;
         int address = 0x8000
                 + 16 * (getLDLCBit(2) ? (spriteRow < 8 ? s.tileIndex & 0xFE : s.tileIndex | 0x01) : s.tileIndex);
 
         int pixelYInTile = spriteRow % 8;
         int pixelXInTile = (pixel - (s.x - 8)) % 8;
+        if (s.isFlipX())
+            pixelXInTile = 7 - pixelXInTile;
 
         int lowerByte = mmu.readByte(address + 2 * pixelYInTile);
         int higherByte = mmu.readByte(address + 2 * pixelYInTile + 1);
