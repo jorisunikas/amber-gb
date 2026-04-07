@@ -10,6 +10,7 @@ public class PPU {
     private int currentScanline;
     private int windowLineCounter;
     private Sprite[] currentSprites;
+    private SpriteContainer sprites;
     private State currentState;
     private final int[] framebuffer;
 
@@ -27,6 +28,7 @@ public class PPU {
         LDLCValue = mmu.readByte(0xFF40);
         currentSprites = new Sprite[10];
         currentState = State.OAM_SCAN;
+        sprites = new SpriteContainer(mmu);
     }
 
     public void step(int cycles) {
@@ -60,8 +62,10 @@ public class PPU {
             if (currentDots < 80) {
                 currentState = State.OAM_SCAN;
             } else if (currentDots < 252) {
-                if (currentState == State.OAM_SCAN)
+                if (currentState == State.OAM_SCAN) {
+                    sprites.updateScanline(currentScanline);
                     currentSprites = readSprites();
+                }
                 currentState = State.DRAW;
             } else {
                 if (currentState == State.DRAW)
@@ -122,13 +126,9 @@ public class PPU {
             int screenX = (getSCX() + i) & 0xFF;
             boolean isWindowVisible = i >= (getWX() - 7) && currentScanline >= getWY() && getLDLCBit(5);
 
-            if (isExistingSpriteHigh(i, currentScanline) && isObjectsEnabled) {
-                Sprite s = currentSprites[indexOfExistingSprite(i, currentScanline)];
-                int pixelValue = getSpritePixelValue(s, i);
-                if (pixelValue != 0) {
-                    framebuffer[i + currentScanline * 160] = getRGBColorPallete(pixelValue, s.getPalette());
+            if (sprites.isSprite(i, true) && isObjectsEnabled) {
+                    framebuffer[i + currentScanline * 160] = sprites.getEncodedPixel(i, true);
                     continue;
-                }
             }
             if (isWindowVisible) {
                 int windowX = i - (getWX() - 7);
@@ -142,11 +142,8 @@ public class PPU {
 
             int pixelValue = getPixelValue(tileMapBaseBackground, tileDataBase, bit4, i, screenX, screenY);
             framebuffer[i + currentScanline * 160] = getRGBColor(pixelValue);
-            if (isExistingSpriteLow(i, currentScanline) && isObjectsEnabled && pixelValue == 0) {
-                Sprite s = currentSprites[indexOfExistingSprite(i, currentScanline)];
-                int objectPixelValue = getSpritePixelValue(s, i);
-                if (objectPixelValue != 0)
-                    framebuffer[i + currentScanline * 160] = getRGBColorPallete(objectPixelValue, s.getPalette());
+            if (sprites.isSprite(i, false) && isObjectsEnabled && pixelValue == 0) {
+                    framebuffer[i + currentScanline * 160] = sprites.getEncodedPixel(i, false);
             }
         }
 
