@@ -66,3 +66,4 @@ The output `amber-gb.jar` will be located in app/build/libs directory.
 - [Pan Docs](https://gbdev.io/pandocs/)
 - [The Ultimate Game Boy talk](https://www.youtube.com/watch?v=HyzD8pNlpwI)
 - [Game Boy opcodes](https://meganesu.github.io/generate-gb-opcodes/)
+- [Game Boy's PPU test](https://github.com/mattcurrie/dmg-acid2?tab=readme-ov-file)
